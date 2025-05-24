@@ -8,7 +8,7 @@ import com.github.michaelbull.result.Result
 import org.springframework.stereotype.Service
 
 @Service
-class UserUsecase(
+class UserUseCase(
     private val employeeRepository: UserRepository
 ) {
     sealed class FindByIdResult {
