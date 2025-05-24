@@ -65,7 +65,9 @@ class UserUseCase(
                     position = position
                 )
 
-                Ok(employeeRepository.update(user))
+                val updatedRowsCount = employeeRepository.update(user)
+
+                Ok(updatedRowsCount)
             }
     }
 }
