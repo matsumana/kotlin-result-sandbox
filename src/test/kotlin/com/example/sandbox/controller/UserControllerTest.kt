@@ -80,7 +80,7 @@ class UserControllerTest {
         @Test
         fun `Update an existing user`() {
             val id = 1
-            val request = UserUpdateRequest("Alice", Position.ENGINEER)
+            val request = UserUpdateRequest("Alice", Position.ENGINEER.toString())
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
 
             actual.statusCode.shouldBe(HttpStatus.OK)
@@ -90,11 +90,22 @@ class UserControllerTest {
         @Test
         fun `Update a non-existing user`() {
             val id = 1_000_000
-            val request = UserUpdateRequest("Alice", Position.ENGINEER)
+            val request = UserUpdateRequest("Alice", Position.ENGINEER.toString())
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
 
             actual.statusCode.shouldBe(HttpStatus.NOT_FOUND)
             actual.body.shouldBe("User with id $id does not exist")
+        }
+
+        @Test
+        fun `request with unknown position`() {
+            val id = 1
+            val position = "FOO"
+            val request = UserUpdateRequest("Alice", position)
+            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
+
+            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
+            actual.body.shouldBe("unknown position: $position")
         }
     }
 }

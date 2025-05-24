@@ -3,7 +3,6 @@ package com.example.sandbox.controller
 import com.example.sandbox.controller.dto.UserCreateRequest
 import com.example.sandbox.controller.dto.UserGetResponse
 import com.example.sandbox.controller.dto.UserUpdateRequest
-import com.example.sandbox.record.User
 import com.example.sandbox.usecase.UserUseCase
 import com.example.sandbox.usecase.UserUseCase.CreateResult
 import com.example.sandbox.usecase.UserUseCase.FindByIdResult
@@ -59,11 +58,8 @@ class UserController(
     @PostMapping("/{id}")
     fun update(@PathVariable id: Int, @RequestBody request: UserUpdateRequest): ResponseEntity<String> =
         userUseCase.update(
-            User(
-                id = id,
-                name = request.name,
-                position = request.position
-            )
+            id,
+            request
         ).mapBoth(
             success = { updatedId ->
                 ResponseEntity("ok", HttpStatus.OK)
@@ -72,6 +68,9 @@ class UserController(
                 when (err) {
                     is UserUseCase.UpdateResult.NotFoundError ->
                         ResponseEntity(err.message, HttpStatus.NOT_FOUND)
+
+                    is UserUseCase.UpdateResult.EnumConvertError ->
+                        ResponseEntity(err.message, HttpStatus.BAD_REQUEST)
                 }
             }
         )

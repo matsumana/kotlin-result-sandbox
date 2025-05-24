@@ -1,6 +1,7 @@
 package com.example.sandbox.usecase
 
 import com.example.sandbox.controller.dto.UserCreateRequest
+import com.example.sandbox.controller.dto.UserUpdateRequest
 import com.example.sandbox.record.User
 import com.example.sandbox.repository.UserRepository
 import com.example.sandbox.valueobject.Position
@@ -22,6 +23,7 @@ class UserUseCase(
 
     sealed class UpdateResult {
         data class NotFoundError(val message: String) : UpdateResult()
+        data class EnumConvertError(val message: String) : UpdateResult()
     }
 
     fun findById(id: Int): Result<User, FindByIdResult> =
@@ -50,17 +52,21 @@ class UserUseCase(
     }
 
     @Transactional
-    fun update(user: User): Result<Int, UpdateResult> {
-        val existingUser = employeeRepository.findById(user.id)
+    fun update(id: Int, request: UserUpdateRequest): Result<Int, UpdateResult> {
+        val existingUser = employeeRepository.findById(id)
             ?: return Err(
-                UpdateResult.NotFoundError("User with id ${user.id} does not exist")
+                UpdateResult.NotFoundError("User with id $id does not exist")
             )
 
-        val updatedUser = existingUser.copy(
-            name = user.name,
-            position = user.position
-        )
+        return Position.of(request.position)
+            .mapError { UpdateResult.EnumConvertError(it.message) }
+            .andThen { position ->
+                val updatedUser = existingUser.copy(
+                    name = request.name,
+                    position = position
+                )
 
-        return Ok(employeeRepository.update(updatedUser))
+                return Ok(employeeRepository.update(updatedUser))
+            }
     }
 }
