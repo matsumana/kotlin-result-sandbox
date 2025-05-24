@@ -31,8 +31,8 @@ class UserControllerTest {
         @ParameterizedTest
         @CsvSource(
             value = [
-                """ 1, '{"name":"Alice","position":"ENGINEER"}' """,
-                """ 2, '{"name":"Bob","position":"MANAGER"}' """,
+                """ 1, '{"id":1,"name":"Alice","position":"ENGINEER"}' """,
+                """ 2, '{"id":2,"name":"Bob","position":"MANAGER"}' """,
             ]
         )
         fun `Get by the existing IDs and found`(id: Int, expected: String) {
@@ -56,12 +56,12 @@ class UserControllerTest {
     @Nested
     inner class Create {
         @Test
-        fun `Create a new user`() {
+        fun `create a new user`() {
             val request = UserCreateRequest("Alice", Position.ENGINEER.toString())
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
 
             actual.statusCode.shouldBe(HttpStatus.CREATED)
-            actual.body.shouldBe("3")
+            actual.body.shouldBe("""{"id":3,"name":"Alice","position":"ENGINEER"}""")
         }
 
         @Test

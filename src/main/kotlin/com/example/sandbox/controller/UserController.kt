@@ -1,8 +1,10 @@
 package com.example.sandbox.controller
 
 import com.example.sandbox.controller.dto.UserCreateRequest
-import com.example.sandbox.controller.dto.UserGetResponse
 import com.example.sandbox.controller.dto.UserUpdateRequest
+import com.example.sandbox.exception.api.BadRequestException
+import com.example.sandbox.exception.api.NotFoundException
+import com.example.sandbox.record.User
 import com.example.sandbox.usecase.UserUseCase
 import com.example.sandbox.usecase.UserUseCase.CreateResult
 import com.example.sandbox.usecase.UserUseCase.FindByIdResult
@@ -18,39 +20,25 @@ class UserController(
 ) {
 
     @GetMapping("/{id}")
-    fun get(@PathVariable id: Int): ResponseEntity<Any> =
+    fun get(@PathVariable id: Int): ResponseEntity<User> =
         userUseCase.findById(id)
             .mapBoth(
-                success = { ok ->
-                    ResponseEntity(
-                        UserGetResponse(
-                            name = ok.name,
-                            position = ok.position
-                        ),
-                        HttpStatus.OK
-                    )
-                },
+                success = { ResponseEntity(it, HttpStatus.OK) },
                 failure = { err ->
                     when (err) {
-                        is FindByIdResult.NotFoundError ->
-                            ResponseEntity(err.message, HttpStatus.NOT_FOUND)
+                        is FindByIdResult.NotFoundError -> throw NotFoundException(err.message)
                     }
                 }
             )
 
     @PostMapping
-    fun create(@RequestBody request: UserCreateRequest): ResponseEntity<Any> =
+    fun create(@RequestBody request: UserCreateRequest): ResponseEntity<User> =
         userUseCase.create(request)
             .mapBoth(
-                success = { ok ->
-                    val generatedId = ok.id
-
-                    ResponseEntity(generatedId, HttpStatus.CREATED)
-                },
+                success = { ResponseEntity(it, HttpStatus.CREATED) },
                 failure = { err ->
                     when (err) {
-                        is CreateResult.EnumConvertError ->
-                            ResponseEntity(err.message, HttpStatus.BAD_REQUEST)
+                        is CreateResult.EnumConvertError -> throw BadRequestException(err.message)
                     }
                 }
             )
@@ -61,16 +49,12 @@ class UserController(
             id,
             request
         ).mapBoth(
-            success = { updatedId ->
-                ResponseEntity("ok", HttpStatus.OK)
-            },
+            success = { ResponseEntity("ok", HttpStatus.OK) },
             failure = { err ->
                 when (err) {
-                    is UserUseCase.UpdateResult.NotFoundError ->
-                        ResponseEntity(err.message, HttpStatus.NOT_FOUND)
+                    is UserUseCase.UpdateResult.NotFoundError -> throw NotFoundException(err.message)
 
-                    is UserUseCase.UpdateResult.EnumConvertError ->
-                        ResponseEntity(err.message, HttpStatus.BAD_REQUEST)
+                    is UserUseCase.UpdateResult.EnumConvertError -> throw BadRequestException(err.message)
                 }
             }
         )
