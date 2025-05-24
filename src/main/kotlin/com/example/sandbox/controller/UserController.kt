@@ -47,7 +47,7 @@ class UserController(
         )
         userUseCase.create(user)
 
-        // The `create` function updates the user with an auto-generated ID.
+        // The `create` function updates the `user` with an auto-generated ID.
         val generatedId = user.id
 
         return ResponseEntity(generatedId, HttpStatus.CREATED)
