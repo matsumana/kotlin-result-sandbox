@@ -1,4 +1,4 @@
-package com.example.sandbox.service
+package com.example.sandbox.usecase
 
 import com.example.sandbox.record.User
 import com.example.sandbox.repository.UserRepository
@@ -8,7 +8,7 @@ import com.github.michaelbull.result.Result
 import org.springframework.stereotype.Service
 
 @Service
-class UserService(
+class UserUsecase(
     private val employeeRepository: UserRepository
 ) {
     sealed class FindByIdResult {

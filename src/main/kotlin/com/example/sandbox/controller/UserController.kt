@@ -1,7 +1,7 @@
 package com.example.sandbox.controller
 
-import com.example.sandbox.service.UserService
-import com.example.sandbox.service.UserService.FindByIdResult
+import com.example.sandbox.usecase.UserUsecase
+import com.example.sandbox.usecase.UserUsecase.FindByIdResult
 import com.github.michaelbull.result.mapBoth
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class UserController(
-    private val userService: UserService
+    private val userUsecase: UserUsecase
 ) {
 
     @GetMapping("/user/{id}")
     fun user(@PathVariable id: Int): ResponseEntity<String> =
-        userService.findById(id)
+        userUsecase.findById(id)
             .mapBoth(
                 success = { ok ->
                     ResponseEntity(ok.name, HttpStatus.OK)
