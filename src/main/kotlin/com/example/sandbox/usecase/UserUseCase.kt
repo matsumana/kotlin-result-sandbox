@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserUseCase(
-    private val employeeRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
     sealed class FindByIdResult {
         data class NotFoundError(val message: String) : FindByIdResult()
@@ -27,11 +27,8 @@ class UserUseCase(
     }
 
     fun findById(id: Int): Result<User, FindByIdResult> =
-        employeeRepository.findById(id)
-            ?.let { Ok(it) }
-            ?: Err(
-                FindByIdResult.NotFoundError("unknown user with id $id")
-            )
+        userRepository.findById(id)
+            .mapError { FindByIdResult.NotFoundError(it.message) }
 
     @Transactional
     fun create(request: UserCreateRequest): Result<User, CreateResult> =
@@ -44,30 +41,29 @@ class UserUseCase(
                     position
                 )
 
-                employeeRepository.create(user)
+                userRepository.create(user)
 
                 // The `create` function updates the `user` with an auto-generated ID.
                 Ok(user)
             }
 
     @Transactional
-    fun update(id: Int, request: UserUpdateRequest): Result<Int, UpdateResult> {
-        val existingUser = employeeRepository.findById(id)
-            ?: return Err(
-                UpdateResult.NotFoundError("User with id $id does not exist")
+    fun update(id: Int, request: UserUpdateRequest): Result<Int, UpdateResult> =
+        zip(
+            {
+                userRepository.findById(id)
+                    .mapError { UpdateResult.NotFoundError(it.message) }
+            },
+            {
+                Position.of(request.position)
+                    .mapError { UpdateResult.EnumConvertError(it.message) }
+            }
+        ) { existingUser, position ->
+            val user = existingUser.copy(
+                name = request.name,
+                position = position
             )
 
-        return Position.of(request.position)
-            .mapError { UpdateResult.EnumConvertError(it.message) }
-            .andThen { position ->
-                val user = existingUser.copy(
-                    name = request.name,
-                    position = position
-                )
-
-                val updatedRowsCount = employeeRepository.update(user)
-
-                Ok(updatedRowsCount)
-            }
-    }
+            userRepository.update(user)
+        }
 }

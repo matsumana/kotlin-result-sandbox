@@ -94,7 +94,7 @@ class UserControllerTest {
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
 
             actual.statusCode.shouldBe(HttpStatus.NOT_FOUND)
-            actual.body.shouldBe("User with id $id does not exist")
+            actual.body.shouldBe("unknown user with id $id")
         }
 
         @Test

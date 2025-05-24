@@ -1,39 +1,26 @@
 package com.example.sandbox.repository
 
+import com.example.sandbox.mapper.UserMapper
 import com.example.sandbox.record.User
-import org.apache.ibatis.annotations.Insert
-import org.apache.ibatis.annotations.Mapper
-import org.apache.ibatis.annotations.Options
-import org.apache.ibatis.annotations.Select
-import org.apache.ibatis.annotations.Update
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import org.springframework.stereotype.Component
 
-@Mapper
-interface UserRepository {
+@Component
+class UserRepository(
+    private val userMapper: UserMapper
+) {
+    data class NotFoundError(val message: String)
 
-    @Select(
-        """
-        SELECT id, name, position
-        FROM user
-        WHERE id = #{id}
-        """
-    )
-    fun findById(id: Int): User?
+    fun findById(id: Int): Result<User, NotFoundError> =
+        userMapper.findById(id)
+            ?.let { Ok(it) }
+            ?: Err(
+                NotFoundError("unknown user with id $id")
+            )
 
-    @Insert(
-        """
-        INSERT INTO user (name, position)
-        VALUES (#{name}, #{position})
-        """
-    )
-    @Options(useGeneratedKeys = true, keyProperty = "id")
-    fun create(user: User): Int
+    fun create(user: User): Int = userMapper.create(user)
 
-    @Update(
-        """
-        UPDATE user
-        SET name = #{name}, position = #{position}
-        WHERE id = #{id}
-        """
-    )
-    fun update(updatedUser: User): Int
+    fun update(updatedUser: User): Int = userMapper.update(updatedUser)
 }
