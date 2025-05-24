@@ -1,5 +1,6 @@
 package com.example.sandbox.controller
 
+import com.example.sandbox.controller.dto.UserCreateRequest
 import com.example.sandbox.valueobject.Position
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
@@ -23,18 +24,6 @@ class UserControllerTest {
 
     @LocalServerPort
     lateinit var port: Integer
-
-    @Nested
-    inner class Create {
-        @Test
-        fun `Create a new user`() {
-            val request = UserCreateRequest("Alice", Position.ENGINEER)
-            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
-
-            actual.statusCode.shouldBe(HttpStatus.CREATED)
-            actual.body.shouldBe("ok")
-        }
-    }
 
     @Nested
     inner class Get {
@@ -61,5 +50,40 @@ class UserControllerTest {
 
         private fun getById(id: Int): ResponseEntity<String> =
             restTemplate.getForEntity<String>("http://localhost:$port/user/$id")
+    }
+
+    @Nested
+    inner class Create {
+        @Test
+        fun `Create a new user`() {
+            val request = UserCreateRequest("Alice", Position.ENGINEER)
+            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
+
+            actual.statusCode.shouldBe(HttpStatus.CREATED)
+            actual.body.shouldBe("3")
+        }
+    }
+
+    @Nested
+    inner class Update {
+        @Test
+        fun `Update an existing user`() {
+            val id = 1
+            val request = UserCreateRequest("Alice", Position.ENGINEER)
+            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
+
+            actual.statusCode.shouldBe(HttpStatus.OK)
+            actual.body.shouldBe("ok")
+        }
+
+        @Test
+        fun `Update a non-existing user`() {
+            val id = 1_000_000
+            val request = UserCreateRequest("Alice", Position.ENGINEER)
+            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
+
+            actual.statusCode.shouldBe(HttpStatus.NOT_FOUND)
+            actual.body.shouldBe("User with id $id does not exist")
+        }
     }
 }

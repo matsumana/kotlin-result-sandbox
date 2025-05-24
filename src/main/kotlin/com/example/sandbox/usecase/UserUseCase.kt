@@ -16,6 +16,10 @@ class UserUseCase(
         data class NotFound(val message: String) : FindByIdResult()
     }
 
+    sealed class UpdateResult {
+        data class NotFound(val message: String) : UpdateResult()
+    }
+
     fun findById(id: Int): Result<User, FindByIdResult> =
         employeeRepository.findById(id)
             ?.let { Ok(it) }
@@ -24,7 +28,20 @@ class UserUseCase(
             )
 
     @Transactional
-    fun create(user: User): Int {
-        return employeeRepository.create(user)
+    fun create(user: User): Int = employeeRepository.create(user)
+
+    @Transactional
+    fun update(user: User): Result<Int, UpdateResult> {
+        val existingUser = employeeRepository.findById(user.id)
+            ?: return Err(
+                UpdateResult.NotFound("User with id ${user.id} does not exist")
+            )
+
+        val updatedUser = existingUser.copy(
+            name = user.name,
+            position = user.position
+        )
+
+        return Ok(employeeRepository.update(updatedUser))
     }
 }

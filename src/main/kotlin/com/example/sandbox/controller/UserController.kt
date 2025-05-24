@@ -1,5 +1,8 @@
 package com.example.sandbox.controller
 
+import com.example.sandbox.controller.dto.UserCreateRequest
+import com.example.sandbox.controller.dto.UserGetResponse
+import com.example.sandbox.controller.dto.UserUpdateRequest
 import com.example.sandbox.record.User
 import com.example.sandbox.usecase.UserUseCase
 import com.example.sandbox.usecase.UserUseCase.FindByIdResult
@@ -36,14 +39,37 @@ class UserController(
             )
 
     @PostMapping
-    fun create(@RequestBody request: UserCreateRequest): ResponseEntity<String> {
-        userUseCase.create(
-            User(
-                id = -1, // auto-generated
-                request.name,
-                request.position
-            )
+    fun create(@RequestBody request: UserCreateRequest): ResponseEntity<Int> {
+        val user = User(
+            id = -1, // auto-generated
+            request.name,
+            request.position
         )
-        return ResponseEntity("ok", HttpStatus.CREATED)
+        userUseCase.create(user)
+
+        // The `create` function updates the user with an auto-generated ID.
+        val generatedId = user.id
+
+        return ResponseEntity(generatedId, HttpStatus.CREATED)
     }
+
+    @PostMapping("/{id}")
+    fun update(@PathVariable id: Int, @RequestBody request: UserUpdateRequest): ResponseEntity<String> =
+        userUseCase.update(
+            User(
+                id = id,
+                name = request.name,
+                position = request.position
+            )
+        ).mapBoth(
+            success = { updatedId ->
+                ResponseEntity("ok", HttpStatus.OK)
+            },
+            failure = { err ->
+                when (err) {
+                    is UserUseCase.UpdateResult.NotFound ->
+                        ResponseEntity(err.message, HttpStatus.NOT_FOUND)
+                }
+            }
+        )
 }

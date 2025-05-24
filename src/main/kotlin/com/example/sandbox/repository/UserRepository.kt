@@ -3,7 +3,9 @@ package com.example.sandbox.repository
 import com.example.sandbox.record.User
 import org.apache.ibatis.annotations.Insert
 import org.apache.ibatis.annotations.Mapper
+import org.apache.ibatis.annotations.Options
 import org.apache.ibatis.annotations.Select
+import org.apache.ibatis.annotations.Update
 
 @Mapper
 interface UserRepository {
@@ -23,5 +25,15 @@ interface UserRepository {
         VALUES (#{name}, #{position})
         """
     )
+    @Options(useGeneratedKeys = true, keyProperty = "id")
     fun create(user: User): Int
+
+    @Update(
+        """
+        UPDATE user
+        SET name = #{name}, position = #{position}
+        WHERE id = #{id}
+        """
+    )
+    fun update(updatedUser: User): Int
 }
