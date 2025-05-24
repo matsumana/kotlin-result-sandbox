@@ -31,8 +31,8 @@ class UserControllerTest {
         @ParameterizedTest
         @CsvSource(
             value = [
-                """1,'{"name":"Alice","position":"ENGINEER"}'""",
-                """2,'{"name":"Bob","position":"MANAGER"}'""",
+                """ 1, '{"name":"Alice","position":"ENGINEER"}' """,
+                """ 2, '{"name":"Bob","position":"MANAGER"}' """,
             ]
         )
         fun `Get by the existing IDs and found`(id: Int, expected: String) {
