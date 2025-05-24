@@ -21,18 +21,20 @@ class PositionTypeHandler : BaseTypeHandler<Position>() {
     override fun getNullableResult(rs: ResultSet, columnName: String): Position? =
         rs.getString(columnName)?.let { ok ->
             Position.of(ok)
-                .getOrThrow { err -> err.toException() }
+                .getOrThrow { toException(it) }
         }
 
     override fun getNullableResult(rs: ResultSet, columnIndex: Int): Position? =
         rs.getString(columnIndex)?.let { ok ->
             Position.of(ok)
-                .getOrThrow { err -> err.toException() }
+                .getOrThrow { toException(it) }
         }
 
     override fun getNullableResult(cs: CallableStatement, columnIndex: Int): Position? =
         cs.getString(columnIndex)?.let { ok ->
             Position.of(ok)
-                .getOrThrow { err -> err.toException() }
+                .getOrThrow { toException(it) }
         }
+
+    private fun toException(err: Position.ConvertError) = IllegalArgumentException(err.message)
 }
