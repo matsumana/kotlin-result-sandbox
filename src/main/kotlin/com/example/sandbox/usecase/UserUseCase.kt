@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserUseCase(
@@ -21,4 +22,9 @@ class UserUseCase(
             ?: Err(
                 FindByIdResult.NotFound("unknown user with id $id")
             )
+
+    @Transactional
+    fun create(user: User): Int {
+        return employeeRepository.create(user)
+    }
 }

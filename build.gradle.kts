@@ -23,6 +23,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation(libs.kotlinResult)
+    implementation(libs.kotlinLogging)
     implementation(libs.mybatisSpringBootStarter)
     implementation(libs.sqlite)
     implementation("org.flywaydb:flyway-core")

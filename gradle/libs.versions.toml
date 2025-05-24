@@ -6,6 +6,7 @@ mybatisSpringBootStarter = "3.0.4"
 sqlite = "3.49.1.0"
 kotlinResult = "2.0.1"
 kotest = "5.9.1"
+kotlinLogging = "6.0.9"
 
 [plugins]
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
@@ -19,3 +20,4 @@ mybatisSpringBootStarterTest = { module = "org.mybatis.spring.boot:mybatis-sprin
 sqlite = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
 kotlinResult = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlinResult" }
 kotest = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotlinLogging = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlinLogging" }

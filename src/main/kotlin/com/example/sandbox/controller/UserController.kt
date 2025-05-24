@@ -1,14 +1,12 @@
 package com.example.sandbox.controller
 
+import com.example.sandbox.record.User
 import com.example.sandbox.usecase.UserUseCase
 import com.example.sandbox.usecase.UserUseCase.FindByIdResult
 import com.github.michaelbull.result.mapBoth
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/user")
@@ -17,11 +15,17 @@ class UserController(
 ) {
 
     @GetMapping("/{id}")
-    fun get(@PathVariable id: Int): ResponseEntity<String> =
+    fun get(@PathVariable id: Int): ResponseEntity<Any> =
         userUseCase.findById(id)
             .mapBoth(
                 success = { ok ->
-                    ResponseEntity(ok.name, HttpStatus.OK)
+                    ResponseEntity(
+                        UserGetResponse(
+                            name = ok.name,
+                            position = ok.position
+                        ),
+                        HttpStatus.OK
+                    )
                 },
                 failure = { err ->
                     when (err) {
@@ -30,4 +34,16 @@ class UserController(
                     }
                 }
             )
+
+    @PostMapping
+    fun create(@RequestBody request: UserCreateRequest): ResponseEntity<String> {
+        userUseCase.create(
+            User(
+                id = -1, // auto-generated
+                request.name,
+                request.position
+            )
+        )
+        return ResponseEntity("ok", HttpStatus.CREATED)
+    }
 }

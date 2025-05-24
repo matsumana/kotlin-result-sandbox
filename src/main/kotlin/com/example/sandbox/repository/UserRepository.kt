@@ -1,6 +1,7 @@
 package com.example.sandbox.repository
 
 import com.example.sandbox.record.User
+import org.apache.ibatis.annotations.Insert
 import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.annotations.Select
 
@@ -15,4 +16,12 @@ interface UserRepository {
         """
     )
     fun findById(id: Int): User?
+
+    @Insert(
+        """
+        INSERT INTO user (name, position)
+        VALUES (#{name}, #{position})
+        """
+    )
+    fun create(user: User): Int
 }
