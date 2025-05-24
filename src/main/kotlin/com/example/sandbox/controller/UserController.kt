@@ -5,6 +5,7 @@ import com.example.sandbox.controller.dto.UserGetResponse
 import com.example.sandbox.controller.dto.UserUpdateRequest
 import com.example.sandbox.record.User
 import com.example.sandbox.usecase.UserUseCase
+import com.example.sandbox.usecase.UserUseCase.CreateResult
 import com.example.sandbox.usecase.UserUseCase.FindByIdResult
 import com.github.michaelbull.result.mapBoth
 import org.springframework.http.HttpStatus
@@ -32,26 +33,28 @@ class UserController(
                 },
                 failure = { err ->
                     when (err) {
-                        is FindByIdResult.NotFound ->
+                        is FindByIdResult.NotFoundError ->
                             ResponseEntity(err.message, HttpStatus.NOT_FOUND)
                     }
                 }
             )
 
     @PostMapping
-    fun create(@RequestBody request: UserCreateRequest): ResponseEntity<Int> {
-        val user = User(
-            id = -1, // auto-generated
-            request.name,
-            request.position
-        )
-        userUseCase.create(user)
+    fun create(@RequestBody request: UserCreateRequest): ResponseEntity<Any> =
+        userUseCase.create(request)
+            .mapBoth(
+                success = { ok ->
+                    val generatedId = ok.id
 
-        // The `create` function updates the `user` with an auto-generated ID.
-        val generatedId = user.id
-
-        return ResponseEntity(generatedId, HttpStatus.CREATED)
-    }
+                    ResponseEntity(generatedId, HttpStatus.CREATED)
+                },
+                failure = { err ->
+                    when (err) {
+                        is CreateResult.EnumConvertError ->
+                            ResponseEntity(err.message, HttpStatus.BAD_REQUEST)
+                    }
+                }
+            )
 
     @PostMapping("/{id}")
     fun update(@PathVariable id: Int, @RequestBody request: UserUpdateRequest): ResponseEntity<String> =
@@ -67,7 +70,7 @@ class UserController(
             },
             failure = { err ->
                 when (err) {
-                    is UserUseCase.UpdateResult.NotFound ->
+                    is UserUseCase.UpdateResult.NotFoundError ->
                         ResponseEntity(err.message, HttpStatus.NOT_FOUND)
                 }
             }

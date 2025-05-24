@@ -1,6 +1,7 @@
 package com.example.sandbox.controller
 
 import com.example.sandbox.controller.dto.UserCreateRequest
+import com.example.sandbox.controller.dto.UserUpdateRequest
 import com.example.sandbox.valueobject.Position
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
@@ -56,11 +57,21 @@ class UserControllerTest {
     inner class Create {
         @Test
         fun `Create a new user`() {
-            val request = UserCreateRequest("Alice", Position.ENGINEER)
+            val request = UserCreateRequest("Alice", Position.ENGINEER.toString())
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
 
             actual.statusCode.shouldBe(HttpStatus.CREATED)
             actual.body.shouldBe("3")
+        }
+
+        @Test
+        fun `request with unknown position`() {
+            val position = "FOO"
+            val request = UserCreateRequest("Alice", position)
+            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
+
+            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
+            actual.body.shouldBe("unknown position: $position")
         }
     }
 
@@ -69,7 +80,7 @@ class UserControllerTest {
         @Test
         fun `Update an existing user`() {
             val id = 1
-            val request = UserCreateRequest("Alice", Position.ENGINEER)
+            val request = UserUpdateRequest("Alice", Position.ENGINEER)
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
 
             actual.statusCode.shouldBe(HttpStatus.OK)
@@ -79,7 +90,7 @@ class UserControllerTest {
         @Test
         fun `Update a non-existing user`() {
             val id = 1_000_000
-            val request = UserCreateRequest("Alice", Position.ENGINEER)
+            val request = UserUpdateRequest("Alice", Position.ENGINEER)
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
 
             actual.statusCode.shouldBe(HttpStatus.NOT_FOUND)
