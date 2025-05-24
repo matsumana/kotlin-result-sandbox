@@ -9,7 +9,7 @@ interface UserRepository {
 
     @Select(
         """
-        SELECT id, name
+        SELECT id, name, position
         FROM user
         WHERE id = #{id}
         """
