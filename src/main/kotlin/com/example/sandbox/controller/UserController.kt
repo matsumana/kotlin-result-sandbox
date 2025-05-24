@@ -7,15 +7,17 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@RequestMapping("/user")
 class UserController(
     private val userUseCase: UserUseCase
 ) {
 
-    @GetMapping("/user/{id}")
-    fun user(@PathVariable id: Int): ResponseEntity<String> =
+    @GetMapping("/{id}")
+    fun get(@PathVariable id: Int): ResponseEntity<String> =
         userUseCase.findById(id)
             .mapBoth(
                 success = { ok ->
