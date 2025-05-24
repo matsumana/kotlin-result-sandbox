@@ -22,6 +22,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation(libs.kotlinResult)
     implementation(libs.mybatisSpringBootStarter)
     implementation(libs.sqlite)
     implementation("org.flywaydb:flyway-core")

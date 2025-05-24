@@ -4,6 +4,7 @@ springBoot = "3.4.6"
 springDependencyManagement = "1.1.7"
 mybatisSpringBootStarter = "3.0.4"
 sqlite = "3.49.1.0"
+kotlinResult = "2.0.1"
 
 [plugins]
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
@@ -15,3 +16,4 @@ kotlinPluginSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = 
 mybatisSpringBootStarter = { module = "org.mybatis.spring.boot:mybatis-spring-boot-starter", version.ref = "mybatisSpringBootStarter" }
 mybatisSpringBootStarterTest = { module = "org.mybatis.spring.boot:mybatis-spring-boot-starter-test", version.ref = "mybatisSpringBootStarter" }
 sqlite = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
+kotlinResult = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlinResult" }
