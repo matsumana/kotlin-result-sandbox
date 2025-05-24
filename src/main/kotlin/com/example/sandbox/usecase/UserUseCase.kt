@@ -34,8 +34,8 @@ class UserUseCase(
             )
 
     @Transactional
-    fun create(request: UserCreateRequest): Result<User, CreateResult> {
-        return Position.of(request.position)
+    fun create(request: UserCreateRequest): Result<User, CreateResult> =
+        Position.of(request.position)
             .mapError { CreateResult.EnumConvertError(it.message) }
             .andThen { position ->
                 val user = User(
@@ -49,7 +49,6 @@ class UserUseCase(
                 // The `create` function updates the `user` with an auto-generated ID.
                 Ok(user)
             }
-    }
 
     @Transactional
     fun update(id: Int, request: UserUpdateRequest): Result<Int, UpdateResult> {
@@ -61,12 +60,12 @@ class UserUseCase(
         return Position.of(request.position)
             .mapError { UpdateResult.EnumConvertError(it.message) }
             .andThen { position ->
-                val updatedUser = existingUser.copy(
+                val user = existingUser.copy(
                     name = request.name,
                     position = position
                 )
 
-                return Ok(employeeRepository.update(updatedUser))
+                Ok(employeeRepository.update(user))
             }
     }
 }
