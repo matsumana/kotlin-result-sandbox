@@ -5,7 +5,11 @@ import com.example.sandbox.dto.UserUpdateRequestDto
 import com.example.sandbox.record.User
 import com.example.sandbox.repository.UserRepository
 import com.example.sandbox.valueobject.Position
-import com.github.michaelbull.result.*
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.zip
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
