@@ -117,6 +117,17 @@ class UserControllerTest {
             actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
             actual.body.shouldBe("unknown position: $position")
         }
+
+        @Test
+        fun `request with invalid mail address`() {
+            val position = Position.SENIOR_ENGINEER.toString()
+            val mailAddress = "...@example.com"
+            val request = UserCreateRequestDto("Alice", position, mailAddress)
+            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
+
+            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
+            actual.body.shouldBe("Invalid mail address")
+        }
     }
 
     @Nested
@@ -196,6 +207,19 @@ class UserControllerTest {
 
             actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
             actual.body.shouldBe("unknown position: $position")
+        }
+
+        @Test
+        fun `request with invalid mail address`() {
+            val id = 1
+            val name = "Alice"
+            val position = Position.SENIOR_ENGINEER.toString()
+            val mailAddress = "...@example.com"
+            val request = UserUpdateRequestDto(name, position, mailAddress)
+            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
+
+            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
+            actual.body.shouldBe("Invalid mail address")
         }
     }
 }
