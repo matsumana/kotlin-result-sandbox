@@ -33,5 +33,9 @@ interface MailAddress {
 private data class MailAddressData(
     override val value: String
 ) : MailAddress {
+    /**
+     * Note:
+     * This `toString` method is required to INSERT the value into the database correctly.
+     */
     override fun toString(): String = value
 }

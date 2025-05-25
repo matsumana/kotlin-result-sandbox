@@ -62,7 +62,7 @@ class UserUseCase(
             UpdateResult.NotFoundError(err.message)
         }.bind()
 
-        val copied = existingUser.copy(
+        val copiedUser = existingUser.copy(
             name = request.name,
             position = request.position,
             mailAddress = request.mailAddress
@@ -73,6 +73,6 @@ class UserUseCase(
             }
         }.bind()
 
-        userRepository.update(copied)
+        userRepository.update(copiedUser)
     }
 }
