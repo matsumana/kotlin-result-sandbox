@@ -1,6 +1,7 @@
 package com.example.sandbox.dto
 
-data class UserCreateRequestDto(
+data class UserResponseDto(
+    val id: Int,
     val name: String,
     val position: String,
     val mailAddress: String

@@ -2,6 +2,7 @@ package com.example.sandbox.controller
 
 import com.example.sandbox.domain.model.User
 import com.example.sandbox.dto.UserCreateRequestDto
+import com.example.sandbox.dto.UserResponseDto
 import com.example.sandbox.dto.UserUpdateRequestDto
 import com.example.sandbox.exception.BadRequestException
 import com.example.sandbox.exception.NotFoundException
@@ -25,10 +26,10 @@ class UserController(
 ) {
 
     @GetMapping("/{id}")
-    fun get(@PathVariable id: Int): ResponseEntity<User> =
+    fun get(@PathVariable id: Int): ResponseEntity<UserResponseDto> =
         userUseCase.findById(id)
             .mapBoth(
-                success = { ResponseEntity(it, HttpStatus.OK) },
+                success = { ResponseEntity(toDto(it), HttpStatus.OK) },
                 failure = { err ->
                     when (err) {
                         is FindByIdResult.NotFoundError -> throw NotFoundException(err.message)
@@ -37,13 +38,14 @@ class UserController(
             )
 
     @PostMapping
-    fun create(@RequestBody request: UserCreateRequestDto): ResponseEntity<User> =
+    fun create(@RequestBody request: UserCreateRequestDto): ResponseEntity<UserResponseDto> =
         userUseCase.create(request)
             .mapBoth(
-                success = { ResponseEntity(it, HttpStatus.CREATED) },
+                success = { ResponseEntity(toDto(it), HttpStatus.CREATED) },
                 failure = { err ->
                     when (err) {
                         is CreateResult.EnumConvertError -> throw BadRequestException(err.message)
+                        is CreateResult.InvalidMailAddressError -> throw BadRequestException("Invalid mail address")
                     }
                 }
             )
@@ -58,9 +60,16 @@ class UserController(
             failure = { err ->
                 when (err) {
                     is UserUseCase.UpdateResult.NotFoundError -> throw NotFoundException(err.message)
-
                     is UserUseCase.UpdateResult.EnumConvertError -> throw BadRequestException(err.message)
+                    is UserUseCase.UpdateResult.InvalidMailAddressError -> throw BadRequestException("Invalid mail address")
                 }
             }
         )
+
+    private fun toDto(user: User): UserResponseDto = UserResponseDto(
+        id = user.id,
+        name = user.name,
+        position = user.position.toString(),
+        mailAddress = user.mailAddress.value
+    )
 }

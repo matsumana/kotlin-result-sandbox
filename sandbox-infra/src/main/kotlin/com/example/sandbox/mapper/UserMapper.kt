@@ -13,7 +13,7 @@ interface UserMapper {
 
     @Select(
         """
-        SELECT id, name, position
+        SELECT id, name, position, mail_address
         FROM user
         WHERE id = #{id}
         """
@@ -22,8 +22,8 @@ interface UserMapper {
 
     @Insert(
         """
-        INSERT INTO user (name, position)
-        VALUES (#{name}, #{position})
+        INSERT INTO user (name, position, mail_address)
+        VALUES (#{name}, #{position}, #{mailAddress})
         """
     )
     @Options(useGeneratedKeys = true, keyProperty = "id")
@@ -32,7 +32,7 @@ interface UserMapper {
     @Update(
         """
         UPDATE user
-        SET name = #{name}, position = #{position}
+        SET name = #{name}, position = #{position}, mail_address = #{mailAddress}
         WHERE id = #{id}
         """
     )

@@ -2,3 +2,11 @@ spring:
   datasource:
     driver-class-name: org.sqlite.JDBC
     url: "jdbc:sqlite::memory:"
+
+logging:
+  level:
+    com.example.sandbox.mapper: DEBUG
+
+mybatis:
+  configuration:
+    mapUnderscoreToCamelCase: true

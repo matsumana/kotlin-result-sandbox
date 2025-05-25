@@ -48,8 +48,8 @@ class UserControllerTest {
         @ParameterizedTest
         @CsvSource(
             value = [
-                """ 1, '{"id":1,"name":"Alice","position":"ENGINEER"}' """,
-                """ 2, '{"id":2,"name":"Bob","position":"MANAGER"}' """,
+                """ 1, '{"id":1,"name":"Alice","position":"ENGINEER","mailAddress":"alice@example.com"}' """,
+                """ 2, '{"id":2,"name":"Bob","position":"MANAGER","mailAddress":"bob@example.com"}' """,
             ]
         )
         fun `Get by the existing IDs and found`(id: Int, expected: String) {
@@ -77,20 +77,22 @@ class UserControllerTest {
             val id = 3 // Assuming the next ID is 3
             val name = "Foo"
             val position = Position.SENIOR_ENGINEER.toString()
-            val request = UserCreateRequestDto(name, position)
+            val mailAddress = "foo@example.com"
+            val request = UserCreateRequestDto(name, position, mailAddress)
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
 
             actual.statusCode.shouldBe(HttpStatus.CREATED)
-            actual.body.shouldBe("""{"id":$id,"name":"$name","position":"$position"}""")
+            actual.body.shouldBe("""{"id":$id,"name":"$name","position":"$position","mailAddress":"$mailAddress"}""")
 
             val actualInserted = jdbcClient
-                .sql("SELECT id, name, position FROM user WHERE id = :id")
+                .sql("SELECT id, name, position, mail_address FROM user WHERE id = :id")
                 .param("id", id)
                 .query { rs, _ ->
                     User.create(
                         id = rs.getInt("id"),
                         name = rs.getString("name"),
-                        position = rs.getString("position")
+                        position = rs.getString("position"),
+                        mailAddress = rs.getString("mail_address")
                     ).get()
                 }
                 .single()
@@ -99,7 +101,8 @@ class UserControllerTest {
                 User.create(
                     id = id,
                     name = name,
-                    position = position
+                    position = position,
+                    mailAddress = mailAddress
                 ).get()
             )
         }
@@ -107,7 +110,8 @@ class UserControllerTest {
         @Test
         fun `request with unknown position`() {
             val position = "FOO"
-            val request = UserCreateRequestDto("Alice", position)
+            val mailAddress = "foo@example.com"
+            val request = UserCreateRequestDto("Alice", position, mailAddress)
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
 
             actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
@@ -124,10 +128,12 @@ class UserControllerTest {
             val id = 100
             val name = "John Doe"
             val position = Position.MANAGER.toString()
-            jdbcClient.sql("INSERT INTO user (id, name, position) VALUES (:id, :name, :position)")
+            val mailAddress = "john@example.com"
+            jdbcClient.sql("INSERT INTO user (id, name, position, mail_address) VALUES (:id, :name, :position, :mailAddress)")
                 .param("id", id)
                 .param("name", name)
                 .param("position", position)
+                .param("mailAddress", mailAddress)
                 .update()
         }
 
@@ -136,20 +142,22 @@ class UserControllerTest {
             val id = 100
             val name = "Bar"
             val position = Position.GENERAL_MANAGER.toString()
-            val request = UserUpdateRequestDto(name, position)
+            val mailAddress = "bar@example.com"
+            val request = UserUpdateRequestDto(name, position, mailAddress)
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
 
             actual.statusCode.shouldBe(HttpStatus.OK)
             actual.body.shouldBe("ok")
 
             val actualInserted = jdbcClient
-                .sql("SELECT id, name, position FROM user WHERE id = :id")
+                .sql("SELECT id, name, position, mail_address FROM user WHERE id = :id")
                 .param("id", id)
                 .query { rs, _ ->
                     User.create(
                         id = rs.getInt("id"),
                         name = rs.getString("name"),
-                        position = rs.getString("position")
+                        position = rs.getString("position"),
+                        mailAddress = rs.getString("mail_address")
                     ).get()
                 }
                 .single()
@@ -158,7 +166,8 @@ class UserControllerTest {
                 User.create(
                     id = id,
                     name = name,
-                    position = position
+                    position = position,
+                    mailAddress = mailAddress
                 ).get()
             )
         }
@@ -166,7 +175,10 @@ class UserControllerTest {
         @Test
         fun `Update a non-existing user`() {
             val id = 1_000_000
-            val request = UserUpdateRequestDto("Alice", Position.ENGINEER.toString())
+            val name = "Alice"
+            val position = Position.ENGINEER.toString()
+            val mailAddress = "alice@example.com"
+            val request = UserUpdateRequestDto(name, position, mailAddress)
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
 
             actual.statusCode.shouldBe(HttpStatus.NOT_FOUND)
@@ -176,8 +188,10 @@ class UserControllerTest {
         @Test
         fun `request with unknown position`() {
             val id = 1
+            val name = "Alice"
             val position = "FOO"
-            val request = UserUpdateRequestDto("Alice", position)
+            val mailAddress = "alice@example.com"
+            val request = UserUpdateRequestDto(name, position, mailAddress)
             val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
 
             actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)

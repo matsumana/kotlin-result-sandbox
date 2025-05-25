@@ -15,6 +15,7 @@ class MyBatisConfig {
             setDataSource(dataSource)
             setTypeHandlers(
                 PositionTypeHandler(),
+                MailAddressTypeHandler(),
             )
         }
 
