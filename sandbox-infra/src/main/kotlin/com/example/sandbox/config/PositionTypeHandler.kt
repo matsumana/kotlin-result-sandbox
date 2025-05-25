@@ -36,5 +36,5 @@ class PositionTypeHandler : BaseTypeHandler<Position>() {
                 .getOrThrow { toException(it) }
         }
 
-    private fun toException(err: Position.ConvertError) = IllegalArgumentException(err.message)
+    private fun toException(err: Position.EnumConvertError) = IllegalArgumentException(err.message)
 }

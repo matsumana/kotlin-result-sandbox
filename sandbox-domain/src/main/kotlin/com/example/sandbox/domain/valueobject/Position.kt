@@ -12,16 +12,16 @@ enum class Position {
     SENIOR_MANAGER,
     GENERAL_MANAGER;
 
-    data class ConvertError(val message: String)
+    data class EnumConvertError(val message: String)
 
     companion object {
         private val map = entries.associateBy { it.toString() }
 
-        fun of(s: String): Result<Position, ConvertError> =
+        fun of(s: String): Result<Position, EnumConvertError> =
             map[s]?.let {
                 Ok(it)
             } ?: run {
-                Err(ConvertError("unknown position: $s"))
+                Err(EnumConvertError("unknown position: $s"))
             }
     }
 }

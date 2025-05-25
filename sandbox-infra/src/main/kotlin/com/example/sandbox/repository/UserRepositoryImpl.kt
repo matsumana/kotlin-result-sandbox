@@ -16,9 +16,7 @@ class UserRepositoryImpl(
     override fun findById(id: Int): Result<User, NotFoundError> =
         userMapper.findById(id)
             ?.let { Ok(it) }
-            ?: Err(
-                NotFoundError("unknown user with id $id")
-            )
+            ?: Err(NotFoundError("unknown user with id $id"))
 
     override fun create(user: User): Int = userMapper.create(user)
 
