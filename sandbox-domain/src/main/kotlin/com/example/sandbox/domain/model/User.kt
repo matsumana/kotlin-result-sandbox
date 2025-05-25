@@ -48,7 +48,7 @@ interface User {
                 position
             )
 
-        private fun create(
+        fun create(
             id: Int,
             name: String,
             position: String
