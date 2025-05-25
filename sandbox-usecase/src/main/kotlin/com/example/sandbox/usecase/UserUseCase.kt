@@ -53,8 +53,8 @@ class UserUseCase(
     fun update(id: Int, request: UserUpdateRequestDto): Result<Int, UpdateResult> =
         userRepository.findById(
             id
-        ).mapError {
-            UpdateResult.NotFoundError(it.message)
+        ).mapError { err ->
+            UpdateResult.NotFoundError(err.message)
         }.flatMap { existingUser ->
             existingUser.copy(
                 name = request.name,
