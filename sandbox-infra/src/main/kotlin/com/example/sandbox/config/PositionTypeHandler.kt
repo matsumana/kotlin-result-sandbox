@@ -1,4 +1,4 @@
-package com.example.sandbox.config.mybatis
+package com.example.sandbox.config
 
 import com.example.sandbox.domain.valueobject.Position
 import com.github.michaelbull.result.getOrThrow

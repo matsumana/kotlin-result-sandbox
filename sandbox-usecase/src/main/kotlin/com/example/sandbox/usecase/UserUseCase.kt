@@ -39,8 +39,7 @@ class UserUseCase(
         Position.of(request.position)
             .mapError { CreateResult.EnumConvertError(it.message) }
             .andThen { position ->
-                val user = User(
-                    id = -1, // auto-generated
+                val user = User.create(
                     request.name,
                     position
                 )

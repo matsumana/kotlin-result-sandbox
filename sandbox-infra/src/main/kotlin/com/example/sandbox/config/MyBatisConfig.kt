@@ -1,4 +1,4 @@
-package com.example.sandbox.config.mybatis
+package com.example.sandbox.config
 
 import org.apache.ibatis.session.SqlSessionFactory
 import org.mybatis.spring.SqlSessionFactoryBean
