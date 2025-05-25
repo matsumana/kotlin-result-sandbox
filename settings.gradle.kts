@@ -1,8 +1,8 @@
 rootProject.name = "kotlin-result-sandbox"
 
 include(
-    ":sandbox-app",
-    ":sandbox-usecase",
+    ":sandbox-presentation",
+    ":sandbox-application",
     ":sandbox-domain",
     ":sandbox-infra",
 )

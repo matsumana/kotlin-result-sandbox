@@ -25,7 +25,7 @@ allprojects {
     }
 
     tasks.bootJar {
-        if (!project.name.endsWith("-app")) {
+        if (!project.name.endsWith("-presentation")) {
             enabled = false
         }
     }
