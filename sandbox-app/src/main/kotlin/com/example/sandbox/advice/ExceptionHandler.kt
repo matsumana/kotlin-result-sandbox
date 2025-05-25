@@ -1,7 +1,7 @@
 package com.example.sandbox.advice
 
-import com.example.sandbox.exception.api.BadRequestException
-import com.example.sandbox.exception.api.NotFoundException
+import com.example.sandbox.exception.BadRequestException
+import com.example.sandbox.exception.NotFoundException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

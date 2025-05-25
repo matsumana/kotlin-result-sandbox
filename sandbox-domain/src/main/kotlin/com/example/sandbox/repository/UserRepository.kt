@@ -1,7 +1,7 @@
 package com.example.sandbox.repository
 
+import com.example.sandbox.domain.model.User
 import com.example.sandbox.error.common.NotFoundError
-import com.example.sandbox.record.User
 import com.github.michaelbull.result.Result
 
 interface UserRepository {

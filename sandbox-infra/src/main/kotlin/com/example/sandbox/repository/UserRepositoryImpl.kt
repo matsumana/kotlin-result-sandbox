@@ -1,8 +1,8 @@
 package com.example.sandbox.repository
 
+import com.example.sandbox.domain.model.User
 import com.example.sandbox.error.common.NotFoundError
 import com.example.sandbox.mapper.UserMapper
-import com.example.sandbox.record.User
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result

@@ -1,8 +1,8 @@
 package com.example.sandbox.controller
 
+import com.example.sandbox.domain.valueobject.Position
 import com.example.sandbox.dto.UserCreateRequestDto
 import com.example.sandbox.dto.UserUpdateRequestDto
-import com.example.sandbox.valueobject.Position
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

@@ -1,6 +1,6 @@
 package com.example.sandbox.mapper
 
-import com.example.sandbox.record.User
+import com.example.sandbox.domain.model.User
 import org.apache.ibatis.annotations.Insert
 import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.annotations.Options

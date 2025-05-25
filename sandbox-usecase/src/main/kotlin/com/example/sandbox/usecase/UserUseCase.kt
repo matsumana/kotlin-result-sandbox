@@ -1,10 +1,10 @@
 package com.example.sandbox.usecase
 
+import com.example.sandbox.domain.model.User
+import com.example.sandbox.domain.valueobject.Position
 import com.example.sandbox.dto.UserCreateRequestDto
 import com.example.sandbox.dto.UserUpdateRequestDto
-import com.example.sandbox.record.User
 import com.example.sandbox.repository.UserRepository
-import com.example.sandbox.valueobject.Position
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen

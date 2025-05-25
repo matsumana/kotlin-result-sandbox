@@ -1,10 +1,10 @@
 package com.example.sandbox.controller
 
+import com.example.sandbox.domain.model.User
 import com.example.sandbox.dto.UserCreateRequestDto
 import com.example.sandbox.dto.UserUpdateRequestDto
-import com.example.sandbox.exception.api.BadRequestException
-import com.example.sandbox.exception.api.NotFoundException
-import com.example.sandbox.record.User
+import com.example.sandbox.exception.BadRequestException
+import com.example.sandbox.exception.NotFoundException
 import com.example.sandbox.usecase.UserUseCase
 import com.example.sandbox.usecase.UserUseCase.CreateResult
 import com.example.sandbox.usecase.UserUseCase.FindByIdResult

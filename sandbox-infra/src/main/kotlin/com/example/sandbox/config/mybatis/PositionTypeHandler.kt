@@ -1,6 +1,6 @@
 package com.example.sandbox.config.mybatis
 
-import com.example.sandbox.valueobject.Position
+import com.example.sandbox.domain.valueobject.Position
 import com.github.michaelbull.result.getOrThrow
 import org.apache.ibatis.type.BaseTypeHandler
 import org.apache.ibatis.type.JdbcType

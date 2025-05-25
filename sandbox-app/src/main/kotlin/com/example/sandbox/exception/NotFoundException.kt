@@ -1,3 +1,3 @@
-package com.example.sandbox.exception.api
+package com.example.sandbox.exception
 
 class NotFoundException(override val message: String) : RuntimeException(message)
