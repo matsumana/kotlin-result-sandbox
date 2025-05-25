@@ -1,9 +1,8 @@
 package com.example.sandbox.domain.model
 
 import com.example.sandbox.domain.valueobject.Position
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.binding
 import com.github.michaelbull.result.mapError
 
 interface User {
@@ -22,18 +21,17 @@ interface User {
     fun copy(
         name: String,
         position: String
-    ): Result<User, CopyResult> =
-        Position.of(position)
+    ): Result<User, CopyResult> = binding {
+        val convertedPosition = Position.of(position)
             .mapError { CopyResult.EnumConvertError(it.message) }
-            .andThen { convertedPosition ->
-                Ok(
-                    UserData(
-                        id, // keep the original id
-                        name,
-                        convertedPosition
-                    )
-                )
-            }
+            .bind()
+
+        UserData(
+            id, // keep the original id
+            name,
+            convertedPosition
+        )
+    }
 
     companion object {
         const val UNGENERATED_ID = -1
@@ -52,12 +50,13 @@ interface User {
             id: Int,
             name: String,
             position: String
-        ): Result<User, CreateResult> =
-            Position.of(position)
+        ): Result<User, CreateResult> = binding {
+            val convertedPosition = Position.of(position)
                 .mapError { CreateResult.EnumConvertError(it.message) }
-                .andThen { convertedPosition ->
-                    Ok(UserData(id, name, convertedPosition))
-                }
+                .bind()
+
+            UserData(id, name, convertedPosition)
+        }
     }
 }
 
