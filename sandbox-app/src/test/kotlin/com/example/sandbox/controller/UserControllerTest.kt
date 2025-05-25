@@ -28,13 +28,13 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserControllerTest {
     @Autowired
-    lateinit var restTemplate: TestRestTemplate
+    private lateinit var restTemplate: TestRestTemplate
 
     @Autowired
     private lateinit var dataSource: DataSource
 
     @LocalServerPort
-    lateinit var port: Integer
+    private var port: Int? = null
 
     private lateinit var jdbcClient: JdbcClient
 
