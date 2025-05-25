@@ -5,41 +5,49 @@ plugins {
     alias(libs.plugins.kotlinPluginSpring)
 }
 
-group = "com.example.sandbox"
-version = "0.0.1-SNAPSHOT"
+allprojects {
+    apply(plugin = "org.springframework.boot")
+    apply(plugin = "io.spring.dependency-management")
+    apply(plugin = "kotlin")
+    apply(plugin = "kotlin-spring")
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+    group = "com.example.sandbox"
+    version = "0.0.1-SNAPSHOT"
+
+    repositories {
+        mavenCentral()
     }
-}
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation(libs.kotlinResult)
-    implementation(libs.kotlinLogging)
-    implementation(libs.mybatisSpringBootStarter)
-    implementation(libs.sqlite)
-    implementation("org.flywaydb:flyway-core")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation(libs.mybatisSpringBootStarterTest)
-    testImplementation(libs.kotest)
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
     }
-}
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+    tasks.bootJar {
+        if (!project.name.endsWith("-app")) {
+            enabled = false
+        }
+    }
+
+    dependencies {
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+        implementation("org.jetbrains.kotlin:kotlin-reflect")
+        implementation(rootProject.libs.kotlinResult)
+        implementation(rootProject.libs.kotlinLogging)
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
+        testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+        testImplementation(rootProject.libs.kotest)
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    }
+
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.addAll("-Xjsr305=strict")
+        }
+    }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
 }

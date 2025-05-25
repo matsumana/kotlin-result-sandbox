@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: kotlin-result-sandbox
+  config:
+    import:
+      - classpath:application-infra.yml

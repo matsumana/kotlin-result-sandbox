@@ -1,6 +1,0 @@
-spring:
-  application:
-    name: kotlin-result-sandbox
-  datasource:
-    driver-class-name: org.sqlite.JDBC
-    url: "jdbc:sqlite::memory:"
