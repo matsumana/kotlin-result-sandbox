@@ -1,4 +1,4 @@
-package com.example.sandbox.controller
+package com.example.sandbox.advice
 
 import com.example.sandbox.exception.api.BadRequestException
 import com.example.sandbox.exception.api.NotFoundException
