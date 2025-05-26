@@ -23,9 +23,9 @@ interface User {
     }
 
     fun copy(
-        name: String,
-        position: String,
-        mailAddress: String
+        name: String = this.name,
+        position: String = this.position.toString(),
+        mailAddress: String = this.mailAddress.value
     ): Result<User, CopyResult> = binding {
         val convertedPosition = Position.of(position)
             .mapError { CopyResult.EnumConvertError(it.message) }
@@ -46,19 +46,7 @@ interface User {
         const val UNGENERATED_ID = -1
 
         fun create(
-            name: String,
-            position: String,
-            mailAddress: String
-        ): Result<User, CreateResult> =
-            create(
-                id = UNGENERATED_ID, // will be replaced with an auto-generated ID after creation with the repository
-                name = name,
-                position = position,
-                mailAddress = mailAddress
-            )
-
-        fun create(
-            id: Int,
+            id: Int = UNGENERATED_ID, // will be replaced with an auto-generated ID after creation with the repository
             name: String,
             position: String,
             mailAddress: String
