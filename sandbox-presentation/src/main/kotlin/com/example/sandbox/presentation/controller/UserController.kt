@@ -8,7 +8,7 @@ import com.example.sandbox.application.usecase.UserUseCase.CreateResult
 import com.example.sandbox.application.usecase.UserUseCase.FindByIdResult
 import com.example.sandbox.presentation.exception.BadRequestException
 import com.example.sandbox.presentation.exception.NotFoundException
-import com.github.michaelbull.result.mapBoth
+import com.github.michaelbull.result.getOrThrow
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,42 +26,37 @@ class UserController(
 
     @GetMapping("/{id}")
     fun get(@PathVariable id: Int): ResponseEntity<UserResponseDto> =
-        userUseCase.findById(id)
-            .mapBoth(
-                success = { ResponseEntity(it, HttpStatus.OK) },
-                failure = { err ->
-                    when (err) {
-                        is FindByIdResult.NotFoundError -> throw NotFoundException(err.message)
-                    }
-                }
-            )
+        userUseCase.findById(
+            id
+        ).getOrThrow { err ->
+            when (err) {
+                is FindByIdResult.NotFoundError -> NotFoundException(err.message)
+            }
+        }.let { ResponseEntity(it, HttpStatus.OK) }
 
     @PostMapping
     fun create(@RequestBody request: UserCreateRequestDto): ResponseEntity<UserResponseDto> =
-        userUseCase.create(request)
-            .mapBoth(
-                success = { ResponseEntity(it, HttpStatus.CREATED) },
-                failure = { err ->
-                    when (err) {
-                        is CreateResult.EnumConvertError -> throw BadRequestException(err.message)
-                        is CreateResult.InvalidMailAddressError -> throw BadRequestException("Invalid mail address")
-                    }
-                }
-            )
+        userUseCase.create(
+            request
+        ).getOrThrow { err ->
+            when (err) {
+                is CreateResult.EnumConvertError -> BadRequestException(err.message)
+                is CreateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")
+            }
+        }.let { ResponseEntity(it, HttpStatus.CREATED) }
 
     @PostMapping("/{id}")
     fun update(@PathVariable id: Int, @RequestBody request: UserUpdateRequestDto): ResponseEntity<String> =
         userUseCase.update(
             id,
             request
-        ).mapBoth(
-            success = { ResponseEntity("ok", HttpStatus.OK) },
-            failure = { err ->
-                when (err) {
-                    is UserUseCase.UpdateResult.NotFoundError -> throw NotFoundException(err.message)
-                    is UserUseCase.UpdateResult.EnumConvertError -> throw BadRequestException(err.message)
-                    is UserUseCase.UpdateResult.InvalidMailAddressError -> throw BadRequestException("Invalid mail address")
-                }
+        ).getOrThrow { err ->
+            when (err) {
+                is UserUseCase.UpdateResult.NotFoundError -> NotFoundException(err.message)
+                is UserUseCase.UpdateResult.EnumConvertError -> BadRequestException(err.message)
+                is UserUseCase.UpdateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")
             }
-        )
+        }.let {
+            ResponseEntity("ok", HttpStatus.OK)
+        }
 }
