@@ -7,7 +7,6 @@ import com.example.sandbox.domain.model.User
 import com.example.sandbox.domain.repository.UserRepository
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
-import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,17 +30,18 @@ class UserUseCase(
         data object InvalidMailAddressError : UpdateResult()
     }
 
-    fun findById(id: Int): Result<UserResponseDto, FindByIdResult> =
-        userRepository.findById(id)
-            .map {
-                UserResponseDto(
-                    id = it.id,
-                    name = it.name,
-                    position = it.position.toString(),
-                    mailAddress = it.mailAddress.value
-                )
-            }
+    fun findById(id: Int): Result<UserResponseDto, FindByIdResult> = binding {
+        val found = userRepository.findById(id)
             .mapError { FindByIdResult.NotFoundError(it.message) }
+            .bind()
+
+        UserResponseDto(
+            id = found.id,
+            name = found.name,
+            position = found.position.toString(),
+            mailAddress = found.mailAddress.value
+        )
+    }
 
     @Transactional
     fun create(request: UserCreateRequestDto): Result<UserResponseDto, CreateResult> = binding {
