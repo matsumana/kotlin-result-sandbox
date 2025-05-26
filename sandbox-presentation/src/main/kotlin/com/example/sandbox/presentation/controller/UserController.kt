@@ -32,7 +32,9 @@ class UserController(
             when (err) {
                 is FindByIdResult.NotFoundError -> NotFoundException(err.message)
             }
-        }.let { ResponseEntity(it, HttpStatus.OK) }
+        }.let {
+            ResponseEntity(it, HttpStatus.OK)
+        }
 
     @PostMapping
     fun create(@RequestBody request: UserCreateRequestDto): ResponseEntity<UserResponseDto> =
@@ -43,7 +45,9 @@ class UserController(
                 is CreateResult.EnumConvertError -> BadRequestException(err.message)
                 is CreateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")
             }
-        }.let { ResponseEntity(it, HttpStatus.CREATED) }
+        }.let {
+            ResponseEntity(it, HttpStatus.CREATED)
+        }
 
     @PostMapping("/{id}")
     fun update(@PathVariable id: Int, @RequestBody request: UserUpdateRequestDto): ResponseEntity<String> =
