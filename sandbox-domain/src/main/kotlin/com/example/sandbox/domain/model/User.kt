@@ -58,7 +58,12 @@ interface User {
                 .mapError { CreateResult.InvalidMailAddressError }
                 .bind()
 
-            UserData(id, name, convertedPosition, convertedMailAddress)
+            UserData(
+                id = id,
+                name = name,
+                position = convertedPosition,
+                mailAddress = convertedMailAddress
+            )
         }
     }
 }
