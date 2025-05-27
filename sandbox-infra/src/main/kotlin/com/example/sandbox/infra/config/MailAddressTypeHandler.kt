@@ -15,7 +15,7 @@ class MailAddressTypeHandler : BaseTypeHandler<MailAddress>() {
         parameter: MailAddress,
         jdbcType: JdbcType?,
     ) {
-        ps.setString(i, parameter.toString())
+        ps.setString(i, parameter.value)
     }
 
     override fun getNullableResult(rs: ResultSet, columnName: String): MailAddress? =
