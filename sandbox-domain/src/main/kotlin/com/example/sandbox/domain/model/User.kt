@@ -5,9 +5,10 @@ import com.example.sandbox.domain.valueobject.Position
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
 import com.github.michaelbull.result.mapError
+import de.huxhorn.sulky.ulid.ULID
 
 interface User {
-    val id: Int
+    val id: ULID.Value
     val name: String
     val position: Position
     val mailAddress: MailAddress
@@ -46,7 +47,6 @@ interface User {
         const val UNGENERATED_ID = -1
 
         fun create(
-            id: Int = UNGENERATED_ID, // will be replaced with an auto-generated ID after creation with the repository
             name: String,
             position: String,
             mailAddress: String
@@ -59,17 +59,19 @@ interface User {
                 .bind()
 
             UserData(
-                id = id,
+                id = generateId(),
                 name = name,
                 position = convertedPosition,
                 mailAddress = convertedMailAddress
             )
         }
+
+        private fun generateId(): ULID.Value = ULID().nextValue()
     }
 }
 
 private data class UserData(
-    override val id: Int,
+    override val id: ULID.Value,
     override val name: String,
     override val position: Position,
     override val mailAddress: MailAddress

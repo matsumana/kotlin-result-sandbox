@@ -8,6 +8,7 @@ kotlinResult = "2.0.1"
 kotest = "5.9.1"
 kotlinLogging = "6.0.9"
 commonsValidator = "1.9.0"
+ulid = "8.3.0"
 
 [plugins]
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
@@ -23,3 +24,4 @@ kotlinResult = { module = "com.michael-bull.kotlin-result:kotlin-result", versio
 kotest = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotlinLogging = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlinLogging" }
 commonsValidator = { module = "commons-validator:commons-validator", version.ref = "commonsValidator" }
+ulid = { module = "de.huxhorn.sulky:de.huxhorn.sulky.ulid", version.ref = "ulid" }

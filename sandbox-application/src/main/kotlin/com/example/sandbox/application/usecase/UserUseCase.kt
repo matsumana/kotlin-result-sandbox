@@ -8,6 +8,7 @@ import com.example.sandbox.domain.repository.UserRepository
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
 import com.github.michaelbull.result.mapError
+import de.huxhorn.sulky.ulid.ULID
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -30,13 +31,15 @@ class UserUseCase(
         data object InvalidMailAddressError : UpdateResult()
     }
 
-    fun findById(id: Int): Result<UserResponseDto, FindByIdResult> = binding {
-        val found = userRepository.findById(id)
-            .mapError { FindByIdResult.NotFoundError(it.message) }
-            .bind()
+    fun findById(id: String): Result<UserResponseDto, FindByIdResult> = binding {
+        val found = userRepository.findById(
+            ULID.parseULID(id)
+        ).mapError {
+            FindByIdResult.NotFoundError(it.message)
+        }.bind()
 
         UserResponseDto(
-            id = found.id,
+            id = found.id.toString(),
             name = found.name,
             position = found.position.toString(),
             mailAddress = found.mailAddress.value
@@ -58,9 +61,8 @@ class UserUseCase(
 
         userRepository.create(user)
 
-        // The `create` function updates the `user` with an auto-generated ID.
         UserResponseDto(
-            id = user.id,
+            id = user.id.toString(),
             name = user.name,
             position = user.position.toString(),
             mailAddress = user.mailAddress.value
@@ -68,9 +70,9 @@ class UserUseCase(
     }
 
     @Transactional
-    fun update(id: Int, request: UserUpdateRequestDto): Result<Int, UpdateResult> = binding {
+    fun update(id: String, request: UserUpdateRequestDto): Result<Int, UpdateResult> = binding {
         val existingUser = userRepository.findById(
-            id
+            ULID.parseULID(id)
         ).mapError { err ->
             UpdateResult.NotFoundError(err.message)
         }.bind()

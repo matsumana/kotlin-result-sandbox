@@ -7,6 +7,7 @@ import com.example.sandbox.infrastructure.mapper.UserMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import de.huxhorn.sulky.ulid.ULID
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -14,7 +15,7 @@ class UserRepositoryImpl(
     private val userMapper: UserMapper
 ) : UserRepository {
 
-    override fun findById(id: Int): Result<User, NotFoundError> =
+    override fun findById(id: ULID.Value): Result<User, NotFoundError> =
         userMapper.findById(id)
             ?.let { Ok(it) }
             ?: Err(NotFoundError("unknown user with id $id"))

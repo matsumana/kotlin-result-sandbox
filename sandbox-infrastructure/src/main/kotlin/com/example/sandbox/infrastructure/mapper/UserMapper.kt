@@ -2,9 +2,9 @@ package com.example.sandbox.infrastructure.mapper
 
 import com.example.sandbox.domain.model.User
 import com.example.sandbox.infrastructure.record.UserRecord
+import de.huxhorn.sulky.ulid.ULID
 import org.apache.ibatis.annotations.Insert
 import org.apache.ibatis.annotations.Mapper
-import org.apache.ibatis.annotations.Options
 import org.apache.ibatis.annotations.Select
 import org.apache.ibatis.annotations.Update
 
@@ -18,15 +18,14 @@ interface UserMapper {
         WHERE id = #{id}
         """
     )
-    fun findById(id: Int): UserRecord?
+    fun findById(id: ULID.Value): UserRecord?
 
     @Insert(
         """
-        INSERT INTO user (name, position, mail_address)
-        VALUES (#{name}, #{position}, #{mailAddress})
+        INSERT INTO user (id, name, position, mail_address)
+        VALUES (#{id}, #{name}, #{position}, #{mailAddress})
         """
     )
-    @Options(useGeneratedKeys = true, keyProperty = "id")
     fun create(user: User): Int
 
     @Update(

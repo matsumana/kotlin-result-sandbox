@@ -14,6 +14,7 @@ class MyBatisConfig {
         val factoryBean = SqlSessionFactoryBean().apply {
             setDataSource(dataSource)
             setTypeHandlers(
+                ULIDTypeHandler(),
                 PositionTypeHandler(),
                 MailAddressTypeHandler(),
             )

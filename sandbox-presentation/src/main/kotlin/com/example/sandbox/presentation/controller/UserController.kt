@@ -26,7 +26,7 @@ class UserController(
 ) {
 
     @GetMapping("/{id}")
-    fun get(@PathVariable id: Int): ResponseEntity<UserResponseDto> =
+    fun get(@PathVariable id: String): ResponseEntity<UserResponseDto> =
         userUseCase.findById(
             id
         ).getOrThrow { err ->
@@ -51,7 +51,7 @@ class UserController(
         }
 
     @PostMapping("/{id}")
-    fun update(@PathVariable id: Int, @RequestBody request: UserUpdateRequestDto): ResponseEntity<String> =
+    fun update(@PathVariable id: String, @RequestBody request: UserUpdateRequestDto): ResponseEntity<String> =
         userUseCase.update(
             id,
             request

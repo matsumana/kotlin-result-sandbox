@@ -3,4 +3,5 @@ dependencies {
     runtimeOnly(project(":sandbox-infrastructure"))
     implementation("org.springframework.boot:spring-boot-starter-web")
     testImplementation("org.springframework:spring-jdbc")
+    testImplementation(libs.ulid)
 }
