@@ -6,6 +6,7 @@ import com.example.sandbox.application.dto.UserUpdateRequestDto
 import com.example.sandbox.application.usecase.UserUseCase
 import com.example.sandbox.application.usecase.UserUseCase.CreateResult
 import com.example.sandbox.application.usecase.UserUseCase.FindByIdResult
+import com.example.sandbox.application.usecase.UserUseCase.UpdateResult
 import com.example.sandbox.presentation.exception.BadRequestException
 import com.example.sandbox.presentation.exception.NotFoundException
 import com.github.michaelbull.result.getOrThrow
@@ -56,9 +57,9 @@ class UserController(
             request
         ).getOrThrow { err ->
             when (err) {
-                is UserUseCase.UpdateResult.NotFoundError -> NotFoundException(err.message)
-                is UserUseCase.UpdateResult.EnumConvertError -> BadRequestException(err.message)
-                is UserUseCase.UpdateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")
+                is UpdateResult.NotFoundError -> NotFoundException(err.message)
+                is UpdateResult.EnumConvertError -> BadRequestException(err.message)
+                is UpdateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")
             }
         }.let {
             ResponseEntity("ok", HttpStatus.OK)
