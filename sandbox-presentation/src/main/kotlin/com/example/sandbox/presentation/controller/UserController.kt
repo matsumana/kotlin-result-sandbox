@@ -31,6 +31,7 @@ class UserController(
             id
         ).getOrThrow { err ->
             when (err) {
+                is FindByIdResult.InvalidULIDError -> BadRequestException(err.message)
                 is FindByIdResult.NotFoundError -> NotFoundException(err.message)
             }
         }.let {
@@ -57,6 +58,7 @@ class UserController(
             request
         ).getOrThrow { err ->
             when (err) {
+                is UpdateResult.InvalidULIDError -> BadRequestException(err.message)
                 is UpdateResult.NotFoundError -> NotFoundException(err.message)
                 is UpdateResult.EnumConvertError -> BadRequestException(err.message)
                 is UpdateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")

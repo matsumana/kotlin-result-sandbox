@@ -54,7 +54,9 @@ class UserControllerTest {
         @ParameterizedTest
         @MethodSource("argumentsProvider")
         fun `Get by the existing IDs and found`(expected: UserResponseDto) {
-            val actual = getById(expected.id)
+            val actual = getById(
+                ULID.parseULID(expected.id)
+            )
             actual.statusCode.shouldBe(HttpStatus.OK)
 
             val actualBody: UserResponseDto = objectReader.readValue(actual.body)
@@ -62,18 +64,26 @@ class UserControllerTest {
         }
 
         @Test
-        fun `Get by not existing ID and not found`() {
+        fun `Get by non-existing ID and not found`() {
             val id = ULID().nextValue()
-            val actual = getById(id.toString())
+            val actual = getById(id)
             actual.statusCode.shouldBe(HttpStatus.NOT_FOUND)
             actual.body.shouldBe("unknown user with id $id")
+        }
+
+        @Test
+        fun `Get by invalid ULID and bad request`() {
+            val id = "abc"
+            val actual = restTemplate.getForEntity<String>("http://localhost:$port/user/$id")
+            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
+            actual.body.shouldBe("ulidString must be exactly 26 chars long.")
         }
 
         private fun argumentsProvider(): Stream<Arguments> {
             return Stream.of(
                 Arguments.of(
                     UserResponseDto(
-                        id = ID_FOR_ALICE,
+                        id = idForAlice.toString(),
                         name = "Alice",
                         position = "ENGINEER",
                         mailAddress = "alice@example.com"
@@ -81,7 +91,7 @@ class UserControllerTest {
                 ),
                 Arguments.of(
                     UserResponseDto(
-                        id = ID_FOR_BOB,
+                        id = idForBob.toString(),
                         name = "Bob",
                         position = "MANAGER",
                         mailAddress = "bob@example.com"
@@ -90,9 +100,8 @@ class UserControllerTest {
             )
         }
 
-        private fun getById(id: String): ResponseEntity<String> {
-            val ulid = ULID.parseULID(id)
-            return restTemplate.getForEntity<String>("http://localhost:$port/user/$ulid")
+        private fun getById(id: ULID.Value): ResponseEntity<String> {
+            return restTemplate.getForEntity<String>("http://localhost:$port/user/$id")
         }
     }
 
@@ -236,7 +245,7 @@ class UserControllerTest {
 
         @Test
         fun `request with unknown position`() {
-            val id = ULID.parseULID(ID_FOR_ALICE)
+            val id = idForAlice
             val name = "Alice"
             val position = "FOO"
             val mailAddress = "alice@example.com"
@@ -249,7 +258,7 @@ class UserControllerTest {
 
         @Test
         fun `request with invalid mail address`() {
-            val id = ULID.parseULID(ID_FOR_ALICE)
+            val id = idForAlice
             val name = "Alice"
             val position = "SENIOR_ENGINEER"
             val mailAddress = "...@example.com"
@@ -259,12 +268,24 @@ class UserControllerTest {
             actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
             actual.body.shouldBe("Invalid mail address")
         }
+
+        @Test
+        fun `Update by invalid ULID and bad request`() {
+            val id = "abc"
+            val name = "baz"
+            val position = "ENGINEER"
+            val mailAddress = "baz@example.com"
+            val request = UserUpdateRequestDto(name, position, mailAddress)
+            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
+            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
+            actual.body.shouldBe("ulidString must be exactly 26 chars long.")
+        }
     }
 
     companion object {
-        private const val ID_FOR_ALICE = "01JW96H5W75VJ50D3PK85HHPXQ"
+        private val idForAlice = ULID.parseULID("01JW96H5W75VJ50D3PK85HHPXQ")
 
-        private const val ID_FOR_BOB = "01JW96J2PK3XC9P3PG2N35ATZ6"
+        private val idForBob = ULID.parseULID("01JW96J2PK3XC9P3PG2N35ATZ6")
 
         private val typeRef = object : TypeReference<UserResponseDto>() {}
 
