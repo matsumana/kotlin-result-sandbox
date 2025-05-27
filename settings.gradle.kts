@@ -4,5 +4,5 @@ include(
     ":sandbox-presentation",
     ":sandbox-application",
     ":sandbox-domain",
-    ":sandbox-infra",
+    ":sandbox-infrastructure",
 )

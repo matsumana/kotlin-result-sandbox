@@ -1,4 +1,4 @@
-package com.example.sandbox.infra.record
+package com.example.sandbox.infrastructure.record
 
 import com.example.sandbox.domain.model.User
 import com.example.sandbox.domain.valueobject.MailAddress

@@ -1,4 +1,4 @@
-package com.example.sandbox.infra.config
+package com.example.sandbox.infrastructure.config
 
 import com.example.sandbox.domain.valueobject.MailAddress
 import com.github.michaelbull.result.getOrThrow

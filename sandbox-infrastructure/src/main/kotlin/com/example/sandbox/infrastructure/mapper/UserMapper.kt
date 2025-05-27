@@ -1,7 +1,7 @@
-package com.example.sandbox.infra.mapper
+package com.example.sandbox.infrastructure.mapper
 
 import com.example.sandbox.domain.model.User
-import com.example.sandbox.infra.record.UserRecord
+import com.example.sandbox.infrastructure.record.UserRecord
 import org.apache.ibatis.annotations.Insert
 import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.annotations.Options

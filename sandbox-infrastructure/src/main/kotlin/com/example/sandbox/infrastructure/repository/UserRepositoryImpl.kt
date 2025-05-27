@@ -1,9 +1,9 @@
-package com.example.sandbox.infra.repository
+package com.example.sandbox.infrastructure.repository
 
 import com.example.sandbox.domain.common.NotFoundError
 import com.example.sandbox.domain.model.User
 import com.example.sandbox.domain.repository.UserRepository
-import com.example.sandbox.infra.mapper.UserMapper
+import com.example.sandbox.infrastructure.mapper.UserMapper
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
