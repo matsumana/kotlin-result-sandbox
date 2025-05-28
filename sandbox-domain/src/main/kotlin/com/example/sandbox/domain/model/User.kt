@@ -44,8 +44,6 @@ interface User {
     }
 
     companion object {
-        const val UNGENERATED_ID = -1
-
         fun create(
             name: String,
             position: String,

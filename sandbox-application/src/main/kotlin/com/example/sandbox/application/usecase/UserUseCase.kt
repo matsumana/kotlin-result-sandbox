@@ -3,15 +3,12 @@ package com.example.sandbox.application.usecase
 import com.example.sandbox.application.dto.UserCreateRequestDto
 import com.example.sandbox.application.dto.UserResponseDto
 import com.example.sandbox.application.dto.UserUpdateRequestDto
-import com.example.sandbox.application.error.common.InvalidULIDError
+import com.example.sandbox.domain.extension.parseULID
 import com.example.sandbox.domain.model.User
 import com.example.sandbox.domain.repository.UserRepository
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
 import com.github.michaelbull.result.mapError
-import de.huxhorn.sulky.ulid.ULID
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -37,7 +34,7 @@ class UserUseCase(
     }
 
     fun findById(id: String): Result<UserResponseDto, FindByIdResult> = binding {
-        val parsedId = parseULID(id).mapError { err ->
+        val parsedId = id.parseULID().mapError { err ->
             FindByIdResult.InvalidULIDError(err.message)
         }.bind()
 
@@ -80,7 +77,7 @@ class UserUseCase(
 
     @Transactional
     fun update(id: String, request: UserUpdateRequestDto): Result<Int, UpdateResult> = binding {
-        val parsedId = parseULID(id).mapError { err ->
+        val parsedId = id.parseULID().mapError { err ->
             UpdateResult.InvalidULIDError(err.message)
         }.bind()
 
@@ -102,15 +99,5 @@ class UserUseCase(
         }.bind()
 
         userRepository.update(copiedUser)
-    }
-
-    private fun parseULID(id: String): Result<ULID.Value, InvalidULIDError> = try {
-        Ok(
-            ULID.parseULID(id)
-        )
-    } catch (e: IllegalArgumentException) {
-        Err(
-            InvalidULIDError(e.message ?: "Invalid ULID format: $id")
-        )
     }
 }

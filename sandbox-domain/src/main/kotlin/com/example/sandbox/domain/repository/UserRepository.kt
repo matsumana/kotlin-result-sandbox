@@ -1,6 +1,6 @@
 package com.example.sandbox.domain.repository
 
-import com.example.sandbox.domain.common.NotFoundError
+import com.example.sandbox.domain.error.common.NotFoundError
 import com.example.sandbox.domain.model.User
 import com.github.michaelbull.result.Result
 import de.huxhorn.sulky.ulid.ULID
