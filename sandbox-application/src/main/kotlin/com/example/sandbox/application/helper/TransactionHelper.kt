@@ -12,10 +12,10 @@ import org.springframework.transaction.support.DefaultTransactionDefinition
 class TransactionHelper(
     private val transactionManager: PlatformTransactionManager,
 ) {
-    internal fun <T, E> bindingWithTransaction(
-        block: BindingScope<E>.() -> T,
+    internal fun <V, E> bindingWithTransaction(
+        block: BindingScope<E>.() -> V,
         errorConverter: (Exception) -> E
-    ): Result<T, E> = try {
+    ): Result<V, E> = try {
         val status = transactionManager.getTransaction(DefaultTransactionDefinition())
 
         try {
