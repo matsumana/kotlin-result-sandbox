@@ -3,6 +3,7 @@ package com.example.sandbox.application.usecase
 import com.example.sandbox.application.dto.UserCreateRequestDto
 import com.example.sandbox.application.dto.UserResponseDto
 import com.example.sandbox.application.dto.UserUpdateRequestDto
+import com.example.sandbox.application.helper.TransactionHelper
 import com.example.sandbox.domain.extension.parseULID
 import com.example.sandbox.domain.model.User
 import com.example.sandbox.domain.repository.UserRepository
@@ -10,10 +11,10 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
 import com.github.michaelbull.result.mapError
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserUseCase(
+    private val transactionHelper: TransactionHelper,
     private val userRepository: UserRepository,
 ) {
     sealed class FindByIdResult {
@@ -22,11 +23,13 @@ class UserUseCase(
     }
 
     sealed class CreateResult {
+        data class ExceptionOccurredError(val e: Exception) : CreateResult()
         data class EnumConvertError(val message: String) : CreateResult()
         data object InvalidMailAddressError : CreateResult()
     }
 
     sealed class UpdateResult {
+        data class ExceptionOccurredError(val e: Exception) : UpdateResult()
         data class InvalidULIDError(val message: String) : UpdateResult()
         data class NotFoundError(val message: String) : UpdateResult()
         data class EnumConvertError(val message: String) : UpdateResult()
@@ -52,52 +55,52 @@ class UserUseCase(
         )
     }
 
-    @Transactional
-    fun create(request: UserCreateRequestDto): Result<UserResponseDto, CreateResult> = binding {
-        val user = User.create(
-            name = request.name,
-            position = request.position,
-            mailAddress = request.mailAddress
-        ).mapError { err ->
-            when (err) {
-                is User.CreateResult.EnumConvertError -> CreateResult.EnumConvertError(err.message)
-                is User.CreateResult.InvalidMailAddressError -> CreateResult.InvalidMailAddressError
-            }
-        }.bind()
+    fun create(request: UserCreateRequestDto): Result<UserResponseDto, CreateResult> =
+        transactionHelper.bindingWithTransaction<UserResponseDto, CreateResult>({
+            val user = User.create(
+                name = request.name,
+                position = request.position,
+                mailAddress = request.mailAddress
+            ).mapError { err ->
+                when (err) {
+                    is User.CreateResult.EnumConvertError -> CreateResult.EnumConvertError(err.message)
+                    is User.CreateResult.InvalidMailAddressError -> CreateResult.InvalidMailAddressError
+                }
+            }.bind()
 
-        userRepository.create(user)
+            userRepository.create(user)
 
-        UserResponseDto(
-            id = user.id.toString(),
-            name = user.name,
-            position = user.position.toString(),
-            mailAddress = user.mailAddress.value
-        )
-    }
+            UserResponseDto(
+                id = user.id.toString(),
+                name = user.name,
+                position = user.position.toString(),
+                mailAddress = user.mailAddress.value
+            )
+        }) { CreateResult.ExceptionOccurredError(it) }
 
-    @Transactional
-    fun update(id: String, request: UserUpdateRequestDto): Result<Int, UpdateResult> = binding {
-        val parsedId = id.parseULID().mapError { err ->
-            UpdateResult.InvalidULIDError(err.message)
-        }.bind()
+    fun update(id: String, request: UserUpdateRequestDto): Result<Int, UpdateResult> =
+        transactionHelper.bindingWithTransaction<Int, UpdateResult>({
+            val parsedId = id.parseULID().mapError { err ->
+                UpdateResult.InvalidULIDError(err.message)
+            }.bind()
 
-        val existingUser = userRepository.findById(
-            parsedId
-        ).mapError { err ->
-            UpdateResult.NotFoundError(err.message)
-        }.bind()
+            val existingUser = userRepository.findById(
+                parsedId
+            ).mapError { err ->
+                UpdateResult.NotFoundError(err.message)
+            }.bind()
 
-        val copiedUser = existingUser.copy(
-            name = request.name,
-            position = request.position,
-            mailAddress = request.mailAddress
-        ).mapError { err ->
-            when (err) {
-                is User.CopyResult.EnumConvertError -> UpdateResult.EnumConvertError(err.message)
-                is User.CopyResult.InvalidMailAddressError -> UpdateResult.InvalidMailAddressError
-            }
-        }.bind()
+            val copiedUser = existingUser.copy(
+                name = request.name,
+                position = request.position,
+                mailAddress = request.mailAddress
+            ).mapError { err ->
+                when (err) {
+                    is User.CopyResult.EnumConvertError -> UpdateResult.EnumConvertError(err.message)
+                    is User.CopyResult.InvalidMailAddressError -> UpdateResult.InvalidMailAddressError
+                }
+            }.bind()
 
-        userRepository.update(copiedUser)
-    }
+            userRepository.update(copiedUser)
+        }) { UpdateResult.ExceptionOccurredError(it) }
 }
