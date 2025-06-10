@@ -3,7 +3,6 @@ package com.example.sandbox.application.helper
 import com.github.michaelbull.result.BindingScope
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.binding
 import org.springframework.stereotype.Component
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.DefaultTransactionDefinition
@@ -21,11 +20,11 @@ internal class TransactionBinder<E>(
     private val transactionManager: PlatformTransactionManager,
     private val mapper: (Exception) -> E
 ) {
-    internal fun <V> bindingWithTransaction(block: BindingScope<E>.() -> V): Result<V, E> = try {
+    internal fun <V> binding(block: BindingScope<E>.() -> V): Result<V, E> = try {
         val status = transactionManager.getTransaction(DefaultTransactionDefinition())
 
         try {
-            val result = binding(block)
+            val result = com.github.michaelbull.result.binding(block)
             if (result.isOk) {
                 transactionManager.commit(status)
             } else {

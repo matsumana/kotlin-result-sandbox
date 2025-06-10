@@ -59,7 +59,7 @@ class UserUseCase(
         request: UserCreateRequestDto
     ): Result<UserResponseDto, CreateResult> = transactionHelper.withExceptionMapper<CreateResult> {
         CreateResult.ExceptionOccurredError(it)
-    }.bindingWithTransaction {
+    }.binding {
         val user = User.create(
             name = request.name,
             position = request.position,
@@ -86,7 +86,7 @@ class UserUseCase(
         request: UserUpdateRequestDto
     ): Result<Int, UpdateResult> = transactionHelper.withExceptionMapper<UpdateResult> {
         UpdateResult.ExceptionOccurredError(it)
-    }.bindingWithTransaction {
+    }.binding {
         val parsedId = id.parseULID().mapError { err ->
             UpdateResult.InvalidULIDError(err.message)
         }.bind()
