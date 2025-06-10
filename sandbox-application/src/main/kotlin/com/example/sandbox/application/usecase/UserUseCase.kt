@@ -23,13 +23,13 @@ class UserUseCase(
     }
 
     sealed class CreateResult {
-        data class ExceptionOccurredError(val e: Exception) : CreateResult()
+        data class ExceptionOccurredError(val exception: Exception) : CreateResult()
         data class EnumConvertError(val message: String) : CreateResult()
         data object InvalidMailAddressError : CreateResult()
     }
 
     sealed class UpdateResult {
-        data class ExceptionOccurredError(val e: Exception) : UpdateResult()
+        data class ExceptionOccurredError(val exception: Exception) : UpdateResult()
         data class InvalidULIDError(val message: String) : UpdateResult()
         data class NotFoundError(val message: String) : UpdateResult()
         data class EnumConvertError(val message: String) : UpdateResult()

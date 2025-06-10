@@ -46,7 +46,7 @@ class UserController(
             when (err) {
                 is CreateResult.EnumConvertError -> BadRequestException(err.message)
                 is CreateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")
-                is CreateResult.ExceptionOccurredError -> err.e
+                is CreateResult.ExceptionOccurredError -> err.exception
             }
         }.let {
             ResponseEntity(it, HttpStatus.CREATED)
@@ -63,7 +63,7 @@ class UserController(
                 is UpdateResult.NotFoundError -> NotFoundException(err.message)
                 is UpdateResult.EnumConvertError -> BadRequestException(err.message)
                 is UpdateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")
-                is UpdateResult.ExceptionOccurredError -> err.e
+                is UpdateResult.ExceptionOccurredError -> err.exception
             }
         }.let {
             ResponseEntity("ok", HttpStatus.OK)
