@@ -55,52 +55,59 @@ class UserUseCase(
         )
     }
 
-    fun create(request: UserCreateRequestDto): Result<UserResponseDto, CreateResult> =
-        transactionHelper.bindingWithTransaction<UserResponseDto, CreateResult>({
-            val user = User.create(
-                name = request.name,
-                position = request.position,
-                mailAddress = request.mailAddress
-            ).mapError { err ->
-                when (err) {
-                    is User.CreateResult.EnumConvertError -> CreateResult.EnumConvertError(err.message)
-                    is User.CreateResult.InvalidMailAddressError -> CreateResult.InvalidMailAddressError
-                }
-            }.bind()
+    fun create(
+        request: UserCreateRequestDto
+    ): Result<UserResponseDto, CreateResult> = transactionHelper.withExceptionMapper<CreateResult> {
+        CreateResult.ExceptionOccurredError(it)
+    }.bindingWithTransaction {
+        val user = User.create(
+            name = request.name,
+            position = request.position,
+            mailAddress = request.mailAddress
+        ).mapError { err ->
+            when (err) {
+                is User.CreateResult.EnumConvertError -> CreateResult.EnumConvertError(err.message)
+                is User.CreateResult.InvalidMailAddressError -> CreateResult.InvalidMailAddressError
+            }
+        }.bind()
 
-            userRepository.create(user)
+        userRepository.create(user)
 
-            UserResponseDto(
-                id = user.id.toString(),
-                name = user.name,
-                position = user.position.toString(),
-                mailAddress = user.mailAddress.value
-            )
-        }) { CreateResult.ExceptionOccurredError(it) }
+        UserResponseDto(
+            id = user.id.toString(),
+            name = user.name,
+            position = user.position.toString(),
+            mailAddress = user.mailAddress.value
+        )
+    }
 
-    fun update(id: String, request: UserUpdateRequestDto): Result<Int, UpdateResult> =
-        transactionHelper.bindingWithTransaction<Int, UpdateResult>({
-            val parsedId = id.parseULID().mapError { err ->
-                UpdateResult.InvalidULIDError(err.message)
-            }.bind()
+    fun update(
+        id: String,
+        request: UserUpdateRequestDto
+    ): Result<Int, UpdateResult> = transactionHelper.withExceptionMapper<UpdateResult> {
+        UpdateResult.ExceptionOccurredError(it)
+    }.bindingWithTransaction {
+        val parsedId = id.parseULID().mapError { err ->
+            UpdateResult.InvalidULIDError(err.message)
+        }.bind()
 
-            val existingUser = userRepository.findById(
-                parsedId
-            ).mapError { err ->
-                UpdateResult.NotFoundError(err.message)
-            }.bind()
+        val existingUser = userRepository.findById(
+            parsedId
+        ).mapError { err ->
+            UpdateResult.NotFoundError(err.message)
+        }.bind()
 
-            val copiedUser = existingUser.copy(
-                name = request.name,
-                position = request.position,
-                mailAddress = request.mailAddress
-            ).mapError { err ->
-                when (err) {
-                    is User.CopyResult.EnumConvertError -> UpdateResult.EnumConvertError(err.message)
-                    is User.CopyResult.InvalidMailAddressError -> UpdateResult.InvalidMailAddressError
-                }
-            }.bind()
+        val copiedUser = existingUser.copy(
+            name = request.name,
+            position = request.position,
+            mailAddress = request.mailAddress
+        ).mapError { err ->
+            when (err) {
+                is User.CopyResult.EnumConvertError -> UpdateResult.EnumConvertError(err.message)
+                is User.CopyResult.InvalidMailAddressError -> UpdateResult.InvalidMailAddressError
+            }
+        }.bind()
 
-            userRepository.update(copiedUser)
-        }) { UpdateResult.ExceptionOccurredError(it) }
+        userRepository.update(copiedUser)
+    }
 }

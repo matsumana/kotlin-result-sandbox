@@ -12,10 +12,16 @@ import org.springframework.transaction.support.DefaultTransactionDefinition
 class TransactionHelper(
     private val transactionManager: PlatformTransactionManager,
 ) {
-    internal fun <V, E> bindingWithTransaction(
-        block: BindingScope<E>.() -> V,
-        errorConverter: (Exception) -> E
-    ): Result<V, E> = try {
+    internal fun <E> withExceptionMapper(
+        mapper: (Exception) -> E
+    ): TransactionBinder<E> = TransactionBinder(transactionManager, mapper)
+}
+
+internal class TransactionBinder<E>(
+    private val transactionManager: PlatformTransactionManager,
+    private val mapper: (Exception) -> E
+) {
+    internal fun <V> bindingWithTransaction(block: BindingScope<E>.() -> V): Result<V, E> = try {
         val status = transactionManager.getTransaction(DefaultTransactionDefinition())
 
         try {
@@ -28,9 +34,9 @@ class TransactionHelper(
             result
         } catch (e: Exception) {
             transactionManager.rollback(status)
-            Err(errorConverter(e))
+            Err(mapper(e))
         }
     } catch (e: Exception) {
-        Err(errorConverter(e))
+        Err(mapper(e))
     }
 }
