@@ -13,26 +13,26 @@ interface User {
     val position: Position
     val mailAddress: MailAddress
 
-    sealed class CreateResult {
-        data class EnumConvertError(val message: String) : CreateResult()
-        data object InvalidMailAddressError : CreateResult()
+    sealed class CreateError {
+        data class EnumConvertError(val message: String) : CreateError()
+        data object InvalidMailAddressError : CreateError()
     }
 
-    sealed class CopyResult {
-        data class EnumConvertError(val message: String) : CopyResult()
-        data object InvalidMailAddressError : CopyResult()
+    sealed class CopyError {
+        data class EnumConvertError(val message: String) : CopyError()
+        data object InvalidMailAddressError : CopyError()
     }
 
     fun copy(
         name: String = this.name,
         position: String = this.position.toString(),
         mailAddress: String = this.mailAddress.value
-    ): Result<User, CopyResult> = binding {
+    ): Result<User, CopyError> = binding {
         val convertedPosition = Position.of(position)
-            .mapError { CopyResult.EnumConvertError(it.message) }
+            .mapError { CopyError.EnumConvertError(it.message) }
             .bind()
         val convertedMailAddress = MailAddress.create(mailAddress)
-            .mapError { CopyResult.InvalidMailAddressError }
+            .mapError { CopyError.InvalidMailAddressError }
             .bind()
 
         UserData(
@@ -48,12 +48,12 @@ interface User {
             name: String,
             position: String,
             mailAddress: String
-        ): Result<User, CreateResult> = binding {
+        ): Result<User, CreateError> = binding {
             val convertedPosition = Position.of(position)
-                .mapError { CreateResult.EnumConvertError(it.message) }
+                .mapError { CreateError.EnumConvertError(it.message) }
                 .bind()
             val convertedMailAddress = MailAddress.create(mailAddress)
-                .mapError { CreateResult.InvalidMailAddressError }
+                .mapError { CreateError.InvalidMailAddressError }
                 .bind()
 
             UserData(

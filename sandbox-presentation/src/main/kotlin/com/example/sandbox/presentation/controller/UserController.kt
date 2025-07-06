@@ -4,9 +4,9 @@ import com.example.sandbox.application.dto.UserCreateRequestDto
 import com.example.sandbox.application.dto.UserResponseDto
 import com.example.sandbox.application.dto.UserUpdateRequestDto
 import com.example.sandbox.application.usecase.UserUseCase
-import com.example.sandbox.application.usecase.UserUseCase.CreateResult
-import com.example.sandbox.application.usecase.UserUseCase.FindByIdResult
-import com.example.sandbox.application.usecase.UserUseCase.UpdateResult
+import com.example.sandbox.application.usecase.UserUseCase.CreateError
+import com.example.sandbox.application.usecase.UserUseCase.FindByIdError
+import com.example.sandbox.application.usecase.UserUseCase.UpdateError
 import com.example.sandbox.presentation.exception.BadRequestException
 import com.example.sandbox.presentation.exception.NotFoundException
 import com.github.michaelbull.result.getOrThrow
@@ -31,8 +31,8 @@ class UserController(
             id
         ).getOrThrow { err ->
             when (err) {
-                is FindByIdResult.InvalidULIDError -> BadRequestException(err.message)
-                is FindByIdResult.NotFoundError -> NotFoundException(err.message)
+                is FindByIdError.InvalidULIDError -> BadRequestException(err.message)
+                is FindByIdError.NotFoundError -> NotFoundException(err.message)
             }
         }.let {
             ResponseEntity(it, HttpStatus.OK)
@@ -44,9 +44,9 @@ class UserController(
             request
         ).getOrThrow { err ->
             when (err) {
-                is CreateResult.EnumConvertError -> BadRequestException(err.message)
-                is CreateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")
-                is CreateResult.ExceptionOccurredError -> err.exception
+                is CreateError.EnumConvertError -> BadRequestException(err.message)
+                is CreateError.InvalidMailAddressError -> BadRequestException("Invalid mail address")
+                is CreateError.ExceptionOccurredError -> err.exception
             }
         }.let {
             ResponseEntity(it, HttpStatus.CREATED)
@@ -59,11 +59,11 @@ class UserController(
             request
         ).getOrThrow { err ->
             when (err) {
-                is UpdateResult.InvalidULIDError -> BadRequestException(err.message)
-                is UpdateResult.NotFoundError -> NotFoundException(err.message)
-                is UpdateResult.EnumConvertError -> BadRequestException(err.message)
-                is UpdateResult.InvalidMailAddressError -> BadRequestException("Invalid mail address")
-                is UpdateResult.ExceptionOccurredError -> err.exception
+                is UpdateError.InvalidULIDError -> BadRequestException(err.message)
+                is UpdateError.NotFoundError -> NotFoundException(err.message)
+                is UpdateError.EnumConvertError -> BadRequestException(err.message)
+                is UpdateError.InvalidMailAddressError -> BadRequestException("Invalid mail address")
+                is UpdateError.ExceptionOccurredError -> err.exception
             }
         }.let {
             ResponseEntity("ok", HttpStatus.OK)
