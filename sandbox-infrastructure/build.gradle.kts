@@ -3,6 +3,6 @@ dependencies {
     implementation(libs.ulid)
     implementation(libs.mybatisSpringBootStarter)
     implementation(libs.sqlite)
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     testImplementation(libs.mybatisSpringBootStarterTest)
 }
