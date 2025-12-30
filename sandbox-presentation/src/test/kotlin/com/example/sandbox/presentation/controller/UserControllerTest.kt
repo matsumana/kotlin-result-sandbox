@@ -3,9 +3,6 @@ package com.example.sandbox.presentation.controller
 import com.example.sandbox.application.dto.UserCreateRequestDto
 import com.example.sandbox.application.dto.UserResponseDto
 import com.example.sandbox.application.dto.UserUpdateRequestDto
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import de.huxhorn.sulky.ulid.ULID
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
@@ -19,21 +16,22 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
-import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.test.web.client.getForEntity
-import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.jdbc.core.simple.JdbcClient
+import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec
+import org.springframework.test.web.reactive.server.expectBody
 import java.util.stream.Stream
 import javax.sql.DataSource
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@AutoConfigureWebTestClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserControllerTest {
     @Autowired
-    private lateinit var restTemplate: TestRestTemplate
+    private lateinit var webClient: WebTestClient
 
     @Autowired
     private lateinit var dataSource: DataSource
@@ -57,26 +55,39 @@ class UserControllerTest {
             val actual = getById(
                 ULID.parseULID(expected.id)
             )
-            actual.statusCode.shouldBe(HttpStatus.OK)
 
-            val actualBody: UserResponseDto = objectReader.readValue(actual.body)
-            actualBody.shouldBe(expected)
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.OK,
+                expected
+            )
         }
 
         @Test
         fun `Get by non-existing ID and not found`() {
             val id = ULID().nextValue()
             val actual = getById(id)
-            actual.statusCode.shouldBe(HttpStatus.NOT_FOUND)
-            actual.body.shouldBe("unknown user with id $id")
+
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.NOT_FOUND,
+                "unknown user with id $id"
+            )
         }
 
         @Test
         fun `Get by invalid ULID and bad request`() {
             val id = "abc"
-            val actual = restTemplate.getForEntity<String>("http://localhost:$port/user/$id")
-            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
-            actual.body.shouldBe("ulidString must be exactly 26 chars long.")
+            val actual = webClient
+                .get()
+                .uri("http://localhost:$port/user/$id")
+                .exchange()
+
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.BAD_REQUEST,
+                "ulidString must be exactly 26 chars long."
+            )
         }
 
         private fun argumentsProvider(): Stream<Arguments> {
@@ -100,9 +111,10 @@ class UserControllerTest {
             )
         }
 
-        private fun getById(id: ULID.Value): ResponseEntity<String> {
-            return restTemplate.getForEntity<String>("http://localhost:$port/user/$id")
-        }
+        private fun getById(id: ULID.Value): ResponseSpec = webClient
+            .get()
+            .uri("http://localhost:$port/user/$id")
+            .exchange()
     }
 
     @Nested
@@ -113,20 +125,30 @@ class UserControllerTest {
             val position = "SENIOR_ENGINEER"
             val mailAddress = "foo@example.com"
             val request = UserCreateRequestDto(name, position, mailAddress)
-            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
+            val actual = webClient
+                .post()
+                .uri("http://localhost:$port/user")
+                .bodyValue(request)
+                .exchange()
 
-            actual.statusCode.shouldBe(HttpStatus.CREATED)
+            actual
+                .returnResult()
+                .status
+                .shouldBe(HttpStatus.CREATED)
 
-            val actualBody: UserResponseDto = objectReader.readValue(actual.body)
-            actualBody.shouldBeEqualToIgnoringFields(
-                UserResponseDto(
-                    id = "ignored",
-                    name = name,
-                    position = position,
-                    mailAddress = mailAddress
-                ),
-                UserResponseDto::id,
-            )
+            actual
+                .expectBody<UserResponseDto>()
+                .returnResult()
+                .responseBody!!
+                .shouldBeEqualToIgnoringFields(
+                    UserResponseDto(
+                        id = "ignored",
+                        name = name,
+                        position = position,
+                        mailAddress = mailAddress
+                    ),
+                    UserResponseDto::id,
+                )
 
             val actualInserted = jdbcClient
                 .sql("SELECT id, name, position, mail_address FROM user WHERE name = :name")
@@ -157,10 +179,17 @@ class UserControllerTest {
             val position = "FOO"
             val mailAddress = "foo@example.com"
             val request = UserCreateRequestDto("Alice", position, mailAddress)
-            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
+            val actual = webClient
+                .post()
+                .uri("http://localhost:$port/user")
+                .bodyValue(request)
+                .exchange()
 
-            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
-            actual.body.shouldBe("unknown position: $position")
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.BAD_REQUEST,
+                "unknown position: $position"
+            )
         }
 
         @Test
@@ -168,10 +197,17 @@ class UserControllerTest {
             val position = "SENIOR_ENGINEER"
             val mailAddress = "...@example.com"
             val request = UserCreateRequestDto("Alice", position, mailAddress)
-            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user", request)
+            val actual = webClient
+                .post()
+                .uri("http://localhost:$port/user")
+                .bodyValue(request)
+                .exchange()
 
-            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
-            actual.body.shouldBe("Invalid mail address")
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.BAD_REQUEST,
+                "Invalid mail address"
+            )
         }
     }
 
@@ -202,10 +238,17 @@ class UserControllerTest {
             val position = "GENERAL_MANAGER"
             val mailAddress = "bar@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
-            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
+            val actual = webClient
+                .post()
+                .uri("http://localhost:$port/user/$id")
+                .bodyValue(request)
+                .exchange()
 
-            actual.statusCode.shouldBe(HttpStatus.OK)
-            actual.body.shouldBe("ok")
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.OK,
+                "ok"
+            )
 
             val actualInserted = jdbcClient
                 .sql("SELECT id, name, position, mail_address FROM user WHERE id = :id")
@@ -237,10 +280,17 @@ class UserControllerTest {
             val position = "ENGINEER"
             val mailAddress = "baz@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
-            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
+            val actual = webClient
+                .post()
+                .uri("http://localhost:$port/user/$id")
+                .bodyValue(request)
+                .exchange()
 
-            actual.statusCode.shouldBe(HttpStatus.NOT_FOUND)
-            actual.body.shouldBe("unknown user with id $id")
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.NOT_FOUND,
+                "unknown user with id $id"
+            )
         }
 
         @Test
@@ -250,10 +300,17 @@ class UserControllerTest {
             val position = "FOO"
             val mailAddress = "alice@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
-            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
+            val actual = webClient
+                .post()
+                .uri("http://localhost:$port/user/$id")
+                .bodyValue(request)
+                .exchange()
 
-            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
-            actual.body.shouldBe("unknown position: $position")
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.BAD_REQUEST,
+                "unknown position: $position"
+            )
         }
 
         @Test
@@ -263,10 +320,17 @@ class UserControllerTest {
             val position = "SENIOR_ENGINEER"
             val mailAddress = "...@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
-            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
+            val actual = webClient
+                .post()
+                .uri("http://localhost:$port/user/$id")
+                .bodyValue(request)
+                .exchange()
 
-            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
-            actual.body.shouldBe("Invalid mail address")
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.BAD_REQUEST,
+                "Invalid mail address"
+            )
         }
 
         @Test
@@ -276,21 +340,39 @@ class UserControllerTest {
             val position = "ENGINEER"
             val mailAddress = "baz@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
-            val actual = restTemplate.postForEntity<String>("http://localhost:$port/user/$id", request)
-            actual.statusCode.shouldBe(HttpStatus.BAD_REQUEST)
-            actual.body.shouldBe("ulidString must be exactly 26 chars long.")
+            val actual = webClient
+                .post()
+                .uri("http://localhost:$port/user/$id")
+                .bodyValue(request)
+                .exchange()
+
+            assertResponseCodeAndBody(
+                actual,
+                HttpStatus.BAD_REQUEST,
+                "ulidString must be exactly 26 chars long."
+            )
         }
     }
 
     companion object {
         private val idForAlice = ULID.parseULID("01JW96H5W75VJ50D3PK85HHPXQ")
-
         private val idForBob = ULID.parseULID("01JW96J2PK3XC9P3PG2N35ATZ6")
 
-        private val typeRef = object : TypeReference<UserResponseDto>() {}
+        private inline fun <reified T : Any> assertResponseCodeAndBody(
+            responseSpec: ResponseSpec,
+            status: HttpStatus,
+            body: T
+        ) {
+            responseSpec
+                .returnResult()
+                .status
+                .shouldBe(status)
 
-        private val objectReader = ObjectMapper()
-            .registerModule(KotlinModule.Builder().build())
-            .readerFor(typeRef)
+            responseSpec
+                .expectBody<T>()
+                .returnResult()
+                .responseBody
+                .shouldBe(body)
+        }
     }
 }

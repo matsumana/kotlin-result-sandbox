@@ -1,13 +1,13 @@
 [versions]
-kotlin = "1.9.25"
-springBoot = "3.4.6"
+kotlin = "2.2.21"
+springBoot = "4.0.1"
 springDependencyManagement = "1.1.7"
-mybatisSpringBootStarter = "3.0.4"
-sqlite = "3.49.1.0"
-kotlinResult = "2.0.1"
-kotest = "5.9.1"
-kotlinLogging = "6.0.9"
-commonsValidator = "1.9.0"
+mybatisSpringBootStarter = "4.0.1"
+sqlite = "3.51.1.0"
+kotlinResult = "2.1.0"
+kotest = "6.0.7"
+kotlinLogging = "7.0.13"
+commonsValidator = "1.10.1"
 ulid = "8.3.0"
 
 [plugins]
