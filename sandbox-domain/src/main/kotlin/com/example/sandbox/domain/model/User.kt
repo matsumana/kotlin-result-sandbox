@@ -11,10 +11,10 @@ class User private constructor(
     val mailAddress: MailAddress
 ) {
 
-    fun copy(
-        name: String = this.name,
-        position: Position = this.position,
-        mailAddress: MailAddress = this.mailAddress
+    fun changeProfile(
+        name: String,
+        position: Position,
+        mailAddress: MailAddress
     ): User = User(
         id = id, // keep the original id
         name = name,

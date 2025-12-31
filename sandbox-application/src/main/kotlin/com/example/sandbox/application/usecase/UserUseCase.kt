@@ -110,12 +110,12 @@ class UserUseCase(
             .mapError { UpdateError.InvalidMailAddressError }
             .bind()
 
-        val copiedUser = existingUser.copy(
+        val updatedUser = existingUser.changeProfile(
             name = request.name,
             position = position,
             mailAddress = mailAddress
         )
 
-        userRepository.update(copiedUser)
+        userRepository.update(updatedUser)
     }
 }
