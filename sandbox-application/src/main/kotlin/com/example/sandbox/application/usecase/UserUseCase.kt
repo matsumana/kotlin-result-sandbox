@@ -66,7 +66,7 @@ class UserUseCase(
             .mapError { CreateError.EnumConvertError(it.message) }
             .bind()
 
-        val mailAddress = MailAddress.create(request.mailAddress)
+        val mailAddress = MailAddress.of(request.mailAddress)
             .mapError { CreateError.InvalidMailAddressError }
             .bind()
 
@@ -106,7 +106,7 @@ class UserUseCase(
             .mapError { UpdateError.EnumConvertError(it.message) }
             .bind()
 
-        val mailAddress = MailAddress.create(request.mailAddress)
+        val mailAddress = MailAddress.of(request.mailAddress)
             .mapError { UpdateError.InvalidMailAddressError }
             .bind()
 

@@ -12,7 +12,7 @@ interface MailAddress {
     data object InvalidMailAddressError
 
     companion object {
-        fun create(value: String): Result<MailAddress, InvalidMailAddressError> = binding {
+        fun of(value: String): Result<MailAddress, InvalidMailAddressError> = binding {
             validate(value).bind()
             MailAddressData(value)
         }

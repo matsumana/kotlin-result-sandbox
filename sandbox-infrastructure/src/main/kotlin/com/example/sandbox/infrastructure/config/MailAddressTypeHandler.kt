@@ -20,19 +20,19 @@ class MailAddressTypeHandler : BaseTypeHandler<MailAddress>() {
 
     override fun getNullableResult(rs: ResultSet, columnName: String): MailAddress? =
         rs.getString(columnName)?.let { ok ->
-            MailAddress.create(ok)
+            MailAddress.of(ok)
                 .getOrThrow { exception }
         }
 
     override fun getNullableResult(rs: ResultSet, columnIndex: Int): MailAddress? =
         rs.getString(columnIndex)?.let { ok ->
-            MailAddress.create(ok)
+            MailAddress.of(ok)
                 .getOrThrow { exception }
         }
 
     override fun getNullableResult(cs: CallableStatement, columnIndex: Int): MailAddress? =
         cs.getString(columnIndex)?.let { ok ->
-            MailAddress.create(ok)
+            MailAddress.of(ok)
                 .getOrThrow { exception }
         }
 
