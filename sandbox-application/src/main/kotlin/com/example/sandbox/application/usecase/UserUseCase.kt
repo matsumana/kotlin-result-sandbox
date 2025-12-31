@@ -7,6 +7,8 @@ import com.example.sandbox.application.helper.TransactionHelper
 import com.example.sandbox.domain.extension.parseULID
 import com.example.sandbox.domain.model.User
 import com.example.sandbox.domain.repository.UserRepository
+import com.example.sandbox.domain.valueobject.MailAddress
+import com.example.sandbox.domain.valueobject.Position
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
 import com.github.michaelbull.result.mapError
@@ -60,16 +62,19 @@ class UserUseCase(
     ): Result<UserResponseDto, CreateError> = transactionHelper.withExceptionMapper<CreateError> {
         CreateError.ExceptionOccurredError(it)
     }.binding {
+        val position = Position.of(request.position)
+            .mapError { CreateError.EnumConvertError(it.message) }
+            .bind()
+
+        val mailAddress = MailAddress.create(request.mailAddress)
+            .mapError { CreateError.InvalidMailAddressError }
+            .bind()
+
         val user = User.create(
             name = request.name,
-            position = request.position,
-            mailAddress = request.mailAddress
-        ).mapError { err ->
-            when (err) {
-                is User.CreateError.EnumConvertError -> CreateError.EnumConvertError(err.message)
-                is User.CreateError.InvalidMailAddressError -> CreateError.InvalidMailAddressError
-            }
-        }.bind()
+            position = position,
+            mailAddress = mailAddress
+        )
 
         userRepository.create(user)
 
@@ -97,16 +102,19 @@ class UserUseCase(
             UpdateError.NotFoundError(err.message)
         }.bind()
 
+        val position = Position.of(request.position)
+            .mapError { UpdateError.EnumConvertError(it.message) }
+            .bind()
+
+        val mailAddress = MailAddress.create(request.mailAddress)
+            .mapError { UpdateError.InvalidMailAddressError }
+            .bind()
+
         val copiedUser = existingUser.copy(
             name = request.name,
-            position = request.position,
-            mailAddress = request.mailAddress
-        ).mapError { err ->
-            when (err) {
-                is User.CopyError.EnumConvertError -> UpdateError.EnumConvertError(err.message)
-                is User.CopyError.InvalidMailAddressError -> UpdateError.InvalidMailAddressError
-            }
-        }.bind()
+            position = position,
+            mailAddress = mailAddress
+        )
 
         userRepository.update(copiedUser)
     }

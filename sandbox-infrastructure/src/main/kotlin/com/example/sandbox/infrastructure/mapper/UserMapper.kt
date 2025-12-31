@@ -1,7 +1,6 @@
 package com.example.sandbox.infrastructure.mapper
 
 import com.example.sandbox.domain.model.User
-import com.example.sandbox.infrastructure.record.UserRecord
 import de.huxhorn.sulky.ulid.ULID
 import org.apache.ibatis.annotations.Insert
 import org.apache.ibatis.annotations.Mapper
@@ -18,7 +17,7 @@ interface UserMapper {
         WHERE id = #{id}
         """
     )
-    fun findById(id: ULID.Value): UserRecord?
+    fun findById(id: ULID.Value): User?
 
     @Insert(
         """
