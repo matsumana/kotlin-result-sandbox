@@ -59,8 +59,8 @@ class UserUseCase(
 
     fun create(
         request: UserCreateRequestDto
-    ): Result<UserResponseDto, CreateError> = transactionHelper.withExceptionMapper<CreateError> {
-        CreateError.ExceptionOccurredError(it)
+    ): Result<UserResponseDto, CreateError> = transactionHelper.withExceptionConverter<CreateError> { e ->
+        CreateError.ExceptionOccurredError(e)
     }.binding {
         val position = Position.of(request.position)
             .mapError { CreateError.EnumConvertError(it.message) }
@@ -89,8 +89,8 @@ class UserUseCase(
     fun update(
         id: String,
         request: UserUpdateRequestDto
-    ): Result<Int, UpdateError> = transactionHelper.withExceptionMapper<UpdateError> {
-        UpdateError.ExceptionOccurredError(it)
+    ): Result<Int, UpdateError> = transactionHelper.withExceptionConverter<UpdateError> { e ->
+        UpdateError.ExceptionOccurredError(e)
     }.binding {
         val parsedId = id.parseULID().mapError { err ->
             UpdateError.InvalidULIDError(err.message)
