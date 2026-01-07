@@ -19,23 +19,23 @@ class UserUseCase(
     private val transactionHelper: TransactionHelper,
     private val userRepository: UserRepository,
 ) {
-    sealed class FindByIdError {
-        data class InvalidULIDError(val message: String) : FindByIdError()
-        data class NotFoundError(val message: String) : FindByIdError()
+    sealed interface FindByIdError {
+        data class InvalidULIDError(val message: String) : FindByIdError
+        data class NotFoundError(val message: String) : FindByIdError
     }
 
-    sealed class CreateError {
-        data class ExceptionOccurredError(val exception: Exception) : CreateError()
-        data class EnumConvertError(val message: String) : CreateError()
-        data object InvalidMailAddressError : CreateError()
+    sealed interface CreateError {
+        data class ExceptionOccurredError(val exception: Exception) : CreateError
+        data class EnumConvertError(val message: String) : CreateError
+        data object InvalidMailAddressError : CreateError
     }
 
-    sealed class UpdateError {
-        data class ExceptionOccurredError(val exception: Exception) : UpdateError()
-        data class InvalidULIDError(val message: String) : UpdateError()
-        data class NotFoundError(val message: String) : UpdateError()
-        data class EnumConvertError(val message: String) : UpdateError()
-        data object InvalidMailAddressError : UpdateError()
+    sealed interface UpdateError {
+        data class ExceptionOccurredError(val exception: Exception) : UpdateError
+        data class InvalidULIDError(val message: String) : UpdateError
+        data class NotFoundError(val message: String) : UpdateError
+        data class EnumConvertError(val message: String) : UpdateError
+        data object InvalidMailAddressError : UpdateError
     }
 
     fun findById(id: String): Result<UserResponseDto, FindByIdError> = binding {
