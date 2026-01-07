@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -52,7 +53,7 @@ class UserController(
             ResponseEntity(it, HttpStatus.CREATED)
         }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     fun update(@PathVariable id: String, @RequestBody request: UserUpdateRequestDto): ResponseEntity<String> =
         userUseCase.update(
             id,

@@ -239,7 +239,7 @@ class UserControllerTest {
             val mailAddress = "bar@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
             val actual = webClient
-                .post()
+                .put()
                 .uri("http://localhost:$port/user/$id")
                 .bodyValue(request)
                 .exchange()
@@ -281,7 +281,7 @@ class UserControllerTest {
             val mailAddress = "baz@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
             val actual = webClient
-                .post()
+                .put()
                 .uri("http://localhost:$port/user/$id")
                 .bodyValue(request)
                 .exchange()
@@ -301,7 +301,7 @@ class UserControllerTest {
             val mailAddress = "alice@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
             val actual = webClient
-                .post()
+                .put()
                 .uri("http://localhost:$port/user/$id")
                 .bodyValue(request)
                 .exchange()
@@ -321,7 +321,7 @@ class UserControllerTest {
             val mailAddress = "...@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
             val actual = webClient
-                .post()
+                .put()
                 .uri("http://localhost:$port/user/$id")
                 .bodyValue(request)
                 .exchange()
@@ -341,7 +341,7 @@ class UserControllerTest {
             val mailAddress = "baz@example.com"
             val request = UserUpdateRequestDto(name, position, mailAddress)
             val actual = webClient
-                .post()
+                .put()
                 .uri("http://localhost:$port/user/$id")
                 .bodyValue(request)
                 .exchange()
