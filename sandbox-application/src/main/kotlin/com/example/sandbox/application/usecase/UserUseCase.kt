@@ -117,5 +117,8 @@ class UserUseCase(
         )
 
         userRepository.update(updatedUser)
+            .mapError { err ->
+                UpdateError.NotFoundError(err.message)
+            }.bind()
     }
 }

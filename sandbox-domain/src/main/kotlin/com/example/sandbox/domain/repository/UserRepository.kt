@@ -9,7 +9,7 @@ interface UserRepository {
 
     fun findById(id: ULID.Value): Result<User, NotFoundError>
 
-    fun create(user: User): Int
+    fun create(user: User): Unit
 
-    fun update(updatedUser: User): Int
+    fun update(updatedUser: User): Result<Int, NotFoundError>
 }

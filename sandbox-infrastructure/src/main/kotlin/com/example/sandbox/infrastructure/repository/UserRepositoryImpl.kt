@@ -20,7 +20,16 @@ class UserRepositoryImpl(
             ?.let { Ok(it) }
             ?: Err(NotFoundError("unknown user with id $id"))
 
-    override fun create(user: User): Int = userMapper.create(user)
+    override fun create(user: User): Unit {
+        userMapper.create(user)
+    }
 
-    override fun update(updatedUser: User): Int = userMapper.update(updatedUser)
+    override fun update(updatedUser: User): Result<Int, NotFoundError> {
+        val updatedCount = userMapper.update(updatedUser)
+        return if (updatedCount > 0) {
+            Ok(updatedCount)
+        } else {
+            Err(NotFoundError("unknown user with id ${updatedUser.id}"))
+        }
+    }
 }
