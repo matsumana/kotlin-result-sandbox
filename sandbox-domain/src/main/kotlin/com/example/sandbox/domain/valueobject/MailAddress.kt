@@ -6,15 +6,16 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
 import org.apache.commons.validator.routines.EmailValidator
 
-interface MailAddress {
+class MailAddress private constructor(
     val value: String
+) {
 
     data object InvalidMailAddressError
 
     companion object {
         fun of(value: String): Result<MailAddress, InvalidMailAddressError> = binding {
             validate(value).bind()
-            MailAddressData(value)
+            MailAddress(value)
         }
 
         private fun validate(value: String): Result<Unit, InvalidMailAddressError> {
@@ -29,7 +30,3 @@ interface MailAddress {
         }
     }
 }
-
-private data class MailAddressData(
-    override val value: String
-) : MailAddress
