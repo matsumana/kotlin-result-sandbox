@@ -6,7 +6,8 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
 import org.apache.commons.validator.routines.EmailValidator
 
-class MailAddress private constructor(
+@ConsistentCopyVisibility
+data class MailAddress private constructor(
     val value: String
 ) {
 
