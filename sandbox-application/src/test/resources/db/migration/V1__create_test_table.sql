@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS test_entity
+(
+    id   INTEGER PRIMARY KEY,
+    name TEXT NOT NULL
+);
