@@ -25,12 +25,20 @@ class UserUseCase(
     }
 
     sealed interface CreateError {
+        companion object {
+            fun fromException(e: Exception): CreateError = ExceptionOccurredError(e)
+        }
+
         data class ExceptionOccurredError(val exception: Exception) : CreateError
         data class EnumConvertError(val message: String) : CreateError
         data object InvalidMailAddressError : CreateError
     }
 
     sealed interface UpdateError {
+        companion object {
+            fun fromException(e: Exception): UpdateError = ExceptionOccurredError(e)
+        }
+
         data class ExceptionOccurredError(val exception: Exception) : UpdateError
         data class InvalidULIDError(val message: String) : UpdateError
         data class NotFoundError(val message: String) : UpdateError
@@ -59,9 +67,9 @@ class UserUseCase(
 
     fun create(
         request: UserCreateRequestDto
-    ): Result<UserResponseDto, CreateError> = transactionHelper.withExceptionConverter<CreateError> { e ->
-        CreateError.ExceptionOccurredError(e)
-    }.binding {
+    ): Result<UserResponseDto, CreateError> = transactionHelper.binding(
+        onException = CreateError::fromException
+    ) {
         val position = Position.of(request.position)
             .mapError { CreateError.EnumConvertError(it.message) }
             .bind()
@@ -89,9 +97,9 @@ class UserUseCase(
     fun update(
         id: String,
         request: UserUpdateRequestDto
-    ): Result<Int, UpdateError> = transactionHelper.withExceptionConverter<UpdateError> { e ->
-        UpdateError.ExceptionOccurredError(e)
-    }.binding {
+    ): Result<Int, UpdateError> = transactionHelper.binding(
+        onException = UpdateError::fromException
+    ) {
         val parsedId = id.parseULID().mapError { err ->
             UpdateError.InvalidULIDError(err.message)
         }.bind()

@@ -3,39 +3,23 @@ package com.example.sandbox.application.helper
 import com.github.michaelbull.result.BindingScope
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.onFailure
 import org.springframework.stereotype.Component
-import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.support.DefaultTransactionDefinition
+import org.springframework.transaction.support.TransactionTemplate
 
 @Component
 class TransactionHelper(
-    private val transactionManager: PlatformTransactionManager,
+    private val transactionTemplate: TransactionTemplate,
 ) {
-    internal fun <E> withExceptionConverter(
-        converter: (Exception) -> E
-    ): TransactionBinder<E> = TransactionBinder(transactionManager, converter)
-}
-
-internal class TransactionBinder<E>(
-    private val transactionManager: PlatformTransactionManager,
-    private val converter: (Exception) -> E
-) {
-    internal fun <V> binding(block: BindingScope<E>.() -> V): Result<V, E> = try {
-        val status = transactionManager.getTransaction(DefaultTransactionDefinition())
-
-        try {
-            val result = com.github.michaelbull.result.binding(block)
-            if (result.isOk) {
-                transactionManager.commit(status)
-            } else {
-                transactionManager.rollback(status)
-            }
-            result
-        } catch (e: Exception) {
-            transactionManager.rollback(status)
-            Err(converter(e))
+    fun <V, E> binding(
+        onException: (Exception) -> E,
+        block: BindingScope<E>.() -> V
+    ): Result<V, E> = try {
+        transactionTemplate.execute { status ->
+            com.github.michaelbull.result.binding(block)
+                .onFailure { status.setRollbackOnly() }
         }
     } catch (e: Exception) {
-        Err(converter(e))
+        Err(onException(e))
     }
 }
