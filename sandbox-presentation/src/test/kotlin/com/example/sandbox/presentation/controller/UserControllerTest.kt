@@ -13,7 +13,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -29,22 +28,14 @@ import javax.sql.DataSource
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UserControllerTest {
-    @Autowired
-    private lateinit var webClient: WebTestClient
-
-    @Autowired
-    private lateinit var dataSource: DataSource
+class UserControllerTest(
+    private val webClient: WebTestClient,
+    dataSource: DataSource,
 
     @LocalServerPort
-    private var port: Int? = null
-
-    private lateinit var jdbcClient: JdbcClient
-
-    @BeforeAll
-    fun setup() {
-        jdbcClient = JdbcClient.create(dataSource)
-    }
+    private val port: Int,
+) {
+    private val jdbcClient: JdbcClient = JdbcClient.create(dataSource)
 
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)

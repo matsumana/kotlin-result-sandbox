@@ -11,11 +11,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.test.context.TestConstructor
-import org.springframework.test.context.TestConstructor.AutowireMode
 
 @SpringBootTest
-@TestConstructor(autowireMode = AutowireMode.ALL)
 class UserUseCaseIntegrationTest(
     private val userUseCase: UserUseCase,
     private val jdbcTemplate: JdbcTemplate,

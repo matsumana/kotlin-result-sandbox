@@ -7,12 +7,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.test.context.TestConstructor
-import org.springframework.test.context.TestConstructor.AutowireMode
 import java.io.IOException
 
 @SpringBootTest
-@TestConstructor(autowireMode = AutowireMode.ALL)
 class TransactionHelperTest(
     private val transactionHelper: TransactionHelper,
     private val jdbcTemplate: JdbcTemplate,
