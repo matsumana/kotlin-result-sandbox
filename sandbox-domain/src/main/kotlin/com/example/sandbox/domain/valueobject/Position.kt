@@ -1,8 +1,7 @@
 package com.example.sandbox.domain.valueobject
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.toResultOr
 
 enum class Position {
     ENGINEER,
@@ -18,10 +17,6 @@ enum class Position {
         private val map = entries.associateBy { it.toString() }
 
         fun of(s: String): Result<Position, EnumConvertError> =
-            map[s]?.let {
-                Ok(it)
-            } ?: run {
-                Err(EnumConvertError("unknown position: $s"))
-            }
+            map[s].toResultOr { EnumConvertError("unknown position: $s") }
     }
 }
