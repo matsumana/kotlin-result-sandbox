@@ -9,6 +9,7 @@ import com.example.sandbox.domain.model.User
 import com.example.sandbox.domain.repository.UserRepository
 import com.example.sandbox.domain.valueobject.MailAddress
 import com.example.sandbox.domain.valueobject.Position
+import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.binding
 import com.github.michaelbull.result.mapError
@@ -26,20 +27,20 @@ class UserUseCase(
 
     sealed interface CreateError {
         companion object {
-            fun fromException(e: Exception): CreateError = ExceptionOccurredError(e)
+            fun fromException(e: Throwable): CreateError = ExceptionOccurredError(e)
         }
 
-        data class ExceptionOccurredError(val exception: Exception) : CreateError
+        data class ExceptionOccurredError(val exception: Throwable) : CreateError
         data class EnumConvertError(val message: String) : CreateError
         data object InvalidMailAddressError : CreateError
     }
 
     sealed interface UpdateError {
         companion object {
-            fun fromException(e: Exception): UpdateError = ExceptionOccurredError(e)
+            fun fromException(e: Throwable): UpdateError = ExceptionOccurredError(e)
         }
 
-        data class ExceptionOccurredError(val exception: Exception) : UpdateError
+        data class ExceptionOccurredError(val exception: Throwable) : UpdateError
         data class InvalidULIDError(val message: String) : UpdateError
         data class NotFoundError(val message: String) : UpdateError
         data class EnumConvertError(val message: String) : UpdateError
@@ -86,11 +87,13 @@ class UserUseCase(
 
         userRepository.create(user)
 
-        UserResponseDto(
-            id = user.id.toString(),
-            name = user.name,
-            position = user.position.toString(),
-            mailAddress = user.mailAddress.value
+        Ok(
+            UserResponseDto(
+                id = user.id.toString(),
+                name = user.name,
+                position = user.position.toString(),
+                mailAddress = user.mailAddress.value
+            )
         )
     }
 
@@ -124,9 +127,11 @@ class UserUseCase(
             mailAddress = mailAddress
         )
 
-        userRepository.update(updatedUser)
+        val updated = userRepository.update(updatedUser)
             .mapError { err ->
                 UpdateError.NotFoundError(err.message)
             }.bind()
+
+        Ok(updated)
     }
 }

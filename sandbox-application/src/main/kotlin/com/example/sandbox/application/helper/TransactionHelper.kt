@@ -6,20 +6,35 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.onFailure
 import org.springframework.stereotype.Component
 import org.springframework.transaction.support.TransactionTemplate
+import java.lang.reflect.UndeclaredThrowableException
 
 @Component
 class TransactionHelper(
     private val transactionTemplate: TransactionTemplate,
 ) {
     fun <V, E> binding(
-        onException: (Exception) -> E,
-        block: BindingScope<E>.() -> V
+        onException: (Throwable) -> E,
+        block: BindingScope<E>.() -> Result<V, E>
     ): Result<V, E> = try {
         transactionTemplate.execute { status ->
-            com.github.michaelbull.result.binding(block)
-                .onFailure { status.setRollbackOnly() }
+            com.github.michaelbull.result.binding<V, E> {
+                block().bind()
+            }.onFailure {
+                status.setRollbackOnly()
+            }
         }
     } catch (e: Exception) {
-        Err(onException(e))
+        if (e is UndeclaredThrowableException) {
+            // TransactionTemplate#execute throws UndeclaredThrowableException when the block throws a checked exception
+            // So unwrap the cause and pass it to onException
+            val cause = e.cause
+            if (cause != null) {
+                Err(onException(cause))
+            } else {
+                Err(onException(e))
+            }
+        } else {
+            Err(onException(e))
+        }
     }
 }

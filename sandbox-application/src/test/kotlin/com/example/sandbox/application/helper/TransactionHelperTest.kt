@@ -1,6 +1,12 @@
 package com.example.sandbox.application.helper
 
+import com.example.sandbox.application.helper.TransactionHelperTest.TestError.DomainError
+import com.example.sandbox.application.helper.TransactionHelperTest.TestError.SystemError
 import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.getErrorOrElse
+import io.kotest.assertions.fail
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -17,6 +23,11 @@ class TransactionHelperTest(
     private val jdbcTemplate: JdbcTemplate,
 ) {
 
+    sealed interface TestError {
+        data class DomainError(val message: String) : TestError
+        data class SystemError(val e: Throwable) : TestError
+    }
+
     @BeforeEach
     fun setUp() {
         jdbcTemplate.execute("DELETE FROM test_entity")
@@ -31,7 +42,9 @@ class TransactionHelperTest(
             transactionHelper.binding(
                 onException = { it }
             ) {
-                insertEntity(entity)
+                Ok(
+                    insertEntity(entity)
+                )
             }
 
             val found = findEntityById(entity.id)
@@ -45,13 +58,16 @@ class TransactionHelperTest(
         @Test
         fun `transaction should rollback when RuntimeException is thrown`() {
             val entity = TestEntity(id = 1, name = "Test")
+            val exception = RuntimeException("Test RuntimeException")
 
-            transactionHelper.binding(
-                onException = { it }
+            val result = transactionHelper.binding<Unit, SystemError>(
+                onException = { SystemError(it) }
             ) {
                 insertEntity(entity)
-                throw RuntimeException("Test RuntimeException")
+                throw exception
             }
+
+            result.getErrorOrFail().shouldBe(SystemError(exception))
 
             findEntityById(entity.id).shouldBeNull()
         }
@@ -62,14 +78,16 @@ class TransactionHelperTest(
         @Test
         fun `transaction should rollback when checked exception is thrown`() {
             val entity = TestEntity(id = 1, name = "Test")
+            val exception = IOException("Test checked exception")
 
-            transactionHelper.binding(
-                onException = { it }
+            val result = transactionHelper.binding<Unit, SystemError>(
+                onException = { e -> SystemError(e) }
             ) {
                 insertEntity(entity)
-                throw IOException("Test checked exception")
+                throw exception
             }
 
+            result.getErrorOrFail().shouldBe(SystemError(exception))
             findEntityById(entity.id).shouldBeNull()
         }
     }
@@ -79,14 +97,13 @@ class TransactionHelperTest(
         @Test
         fun `transaction should rollback when Err is returned`() {
             val entity = TestEntity(id = 1, name = "Test")
+            val exception = RuntimeException("Test error")
 
-            transactionHelper.binding(
-                onException = { it }
+            transactionHelper.binding<Unit, TestError>(
+                onException = { e -> SystemError(e) }
             ) {
                 insertEntity(entity)
-                Err(
-                    RuntimeException("Test error")
-                ).bind()
+                Err(DomainError("error"))
             }
 
             findEntityById(entity.id).shouldBeNull()
@@ -113,4 +130,10 @@ class TransactionHelperTest(
         val id: Int,
         val name: String,
     )
+}
+
+fun <V, E> Result<V, E>.getErrorOrFail(): E {
+    return this.getErrorOrElse {
+        fail("expected error but got success")
+    }
 }
