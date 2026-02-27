@@ -23,18 +23,16 @@ class TransactionHelper(
                 status.setRollbackOnly()
             }
         }
-    } catch (e: Exception) {
-        if (e is UndeclaredThrowableException) {
-            // TransactionTemplate#execute throws UndeclaredThrowableException when the block throws a checked exception
-            // So unwrap the cause and pass it to onException
-            val cause = e.cause
-            if (cause != null) {
-                Err(onException(cause))
-            } else {
-                Err(onException(e))
-            }
+    } catch (e: UndeclaredThrowableException) {
+        // TransactionTemplate#execute throws UndeclaredThrowableException when the block throws a checked exception.
+        // So unwrap the cause and pass it to onException
+        val cause = e.cause
+        if (cause != null) {
+            Err(onException(cause))
         } else {
             Err(onException(e))
         }
+    } catch (e: Exception) {
+        Err(onException(e))
     }
 }
